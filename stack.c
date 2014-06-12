@@ -138,7 +138,7 @@ static int array_pop(stack *s, item_type *item)
 }
 #endif
 
-static bool empty(const stack *s)
+static bool stack_empty(const stack *s)
 {
 	if (s->stack_size != 0) {
 		return false;
@@ -147,7 +147,7 @@ static bool empty(const stack *s)
 	}
 }
 
-static unsigned int size(const stack *s)
+static unsigned int stack_size(const stack *s)
 {
 	return s->stack_size;
 }
@@ -163,7 +163,7 @@ STACK_API stack_api = {
      array_pop,
      array_push,
 #endif
-     empty,
-     size,
+     stack_empty,
+     stack_size,
 };
 
