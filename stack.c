@@ -4,10 +4,12 @@
 
 #include "stack.h"
 #include <stdlib.h>
- stack_api;
+#include <string.h>
+
+//STACK_API stack_api;
 
 #ifdef LINKED_LIST_STACK
-int linked_list_new_stack(stack **s)
+static int linked_list_new_stack(stack **s)
 {
 	*s = (stack *)malloc(sizeof(stack));
     if (*s == NULL) {
@@ -17,7 +19,7 @@ int linked_list_new_stack(stack **s)
 	(*s)->stack_size = 0;
 }
 
-int linked_list_push(stack *s, item_type item)
+static int linked_list_push(stack *s, item_type item)
 {
 	NODE *current_stack_ptr;
     void *stk_ptr;
@@ -33,7 +35,7 @@ int linked_list_push(stack *s, item_type item)
     return 0;
 }
 
-int linked_list_pop(stack *s, item_type *item)
+static int linked_list_pop(stack *s, item_type *item)
 {
 	item_type ret_item;
 	NODE *current_stack_ptr;
@@ -55,7 +57,7 @@ int linked_list_pop(stack *s, item_type *item)
 #endif
 
 #ifdef ARRAY_STACK
-int linked_list_new_stack(stack **s)
+static int array_new_stack(stack **s)
 {
 	*s = (stack *)malloc(sizeof(stack));
     if (*s == NULL) {
@@ -65,13 +67,13 @@ int linked_list_new_stack(stack **s)
     if ((*s)->allocated_ptr) {
         return ENOMEM;
     }
-	(*s)->stack_ptr = (item_tyoe *)(*s)->allocated_ptr;
+	(*s)->stack_ptr = (item_type *)(*s)->allocated_ptr;
 	(*s)->stack_size = 0;
     (*s)->allocated_size_bytes = DEFAULT_ARRAY_STACK_SIZE;
     return 0;
 }
 
-int array_push(stack *s, item_type item)
+static int array_push(stack *s, item_type *item)
 {
     unsigned int stack_size_bytes;
     void *stk_ptr;
@@ -81,7 +83,7 @@ int array_push(stack *s, item_type item)
      * beyond the allocated size
      */
     stack_size_bytes = (s->stack_size * sizeof(item_type));
-    if ((stack_size_bytes + sizeof(item_type)) > s->allocated_size) {
+    if ((stack_size_bytes + sizeof(item_type)) > s->allocated_size_bytes) {
         stk_ptr = realloc(s->stack_ptr, stack_size_bytes << 1);
         if (stk_ptr == NULL) {
             return ENOMEM;
@@ -96,14 +98,15 @@ int array_push(stack *s, item_type item)
      * Executing the PUSH operation
      */
     (s->stack_ptr)++;
-    memcpy(s->stack_ptr, item, sizeof(item_type));
+    memcpy(s->stack_ptr, &item, sizeof(item_type));
     s->stack_size++;
     return 0;
 }
 
-int array_pop(stack *s, item_type *item)
+static int array_pop(stack *s, item_type *item)
 {
     unsigned int allocated_size_bytes;
+	void *stk_ptr;
 
 	if (s == NULL) {
 		return EINVAL;
@@ -124,7 +127,7 @@ int array_pop(stack *s, item_type *item)
     allocated_size_bytes = s->allocated_size_bytes;
     if ((s->stack_size * sizeof(item_type)) <
             allocated_size_bytes >> 1) {
-        stk_ptr = realloc(s->allocated_ptr, allocated_size >> 1);
+        stk_ptr = realloc(s->allocated_ptr, allocated_size_bytes >> 1);
         if (stk_ptr != NULL) {
             s->allocated_ptr = stk_ptr;
             s->stack_ptr = (item_type *)stk_ptr + s->stack_size;
@@ -133,10 +136,9 @@ int array_pop(stack *s, item_type *item)
 
     return 0;
 }
-
 #endif
 
-bool empty(const stack *s)
+static bool empty(const stack *s)
 {
 	if (s->stack_size != 0) {
 		return false;
@@ -145,22 +147,23 @@ bool empty(const stack *s)
 	}
 }
 
-unsigned int size(const stack *s)
+static unsigned int size(const stack *s)
 {
 	return s->stack_size;
 }
 
 STACK_API stack_api = {
 #ifdef LINKED_LIST_STACK
-    _new_stack = linked_list_new_stack,
-    _push      = linked_list_push,
-    _pop       = linked_list_pop,
-#else
-    _new_stack = array_stack,
-    _push      = array_push,
-    _pop       = array_pop,
+     linked_list_new_stack,
+     linked_list_pop,
+     linked_list_push,
 #endif
-    _empty     = empty,
-    _size      = size,
+#ifdef ARRAY_STACK
+     array_new_stack,
+     array_pop,
+     array_push,
+#endif
+     empty,
+     size,
 };
 

@@ -2,10 +2,11 @@
  * Generic Stack header file
  */
 #include <stdbool.h>
+#include <errno.h>
 
 #define DEFAULT_ARRAY_STACK_SIZE 4096
 #define ARRAY_STACK
-#undef LINKED_LIST_STACK
+//#define LINKED_LIST_STACK
 
 typedef int item_type;
 
@@ -31,29 +32,29 @@ typedef struct stack {
 } stack;
 #endif
 
-typedef stack_api {
-    (int) (*_new_stack(stack **s));
-    (item_type) (*_pop(stack *s));
-    (int) (*_push(stack *s, item_type item));
-    (bool) (*_empty(const stack *s));
-    (unsigned int) (*_size(const stack *s));
+typedef struct stack_api {
+    int (*_new_stack)(stack **s);
+    int (*_pop)(stack *s, item_type *item);
+    int (*_push)(stack *s, item_type *item);
+    bool (*_empty)(const stack *s);
+    unsigned int (*_size)(const stack *s);
 } STACK_API;
 
 extern STACK_API stack_api;
 
 #define new_stack(n_stack_ptr) \
-    stack_api._new_stack(n_stack_ptr);
+    stack_api._new_stack(n_stack_ptr)
 
 #define push(stack_ptr, element) \
-    stack_api._push(stack_ptr, element);
+    stack_api._push(stack_ptr, element)
 
-#define pop(stack_ptr) \
-    stack_api._pop(stack_ptr);
+#define pop(stack_ptr, item_type_ptr) \
+    stack_api._pop(stack_ptr, item_type_ptr)
 
 #define empty(stack_ptr) \
-    stack_api._empty(stack_ptr);
+    stack_api._empty(stack_ptr)
 
 #define size(stack_ptr) \
-    stack_api._size(stack_ptr);
+    stack_api._size(stack_ptr)
 
 
