@@ -5,8 +5,7 @@
 #include "stack.h"
 #include <stdlib.h>
 #include <string.h>
-
-//STACK_API stack_api;
+#include <stdio.h>
 
 #ifdef LINKED_LIST_STACK
 static int linked_list_new_stack(stack **s)
@@ -98,7 +97,7 @@ static int array_push(stack *s, item_type *item)
      * Executing the PUSH operation
      */
     (s->stack_ptr)++;
-    memcpy(s->stack_ptr, &item, sizeof(item_type));
+    memcpy(s->stack_ptr, item, sizeof(item_type));
     s->stack_size++;
     return 0;
 }
@@ -116,7 +115,7 @@ static int array_pop(stack *s, item_type *item)
 		return EINVAL;
 	}
 
-    *item = *s->stack_ptr;
+    *item = *(s->stack_ptr);
     s->stack_size -= 1;
     s->stack_ptr -= 1;
 
