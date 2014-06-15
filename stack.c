@@ -84,12 +84,12 @@ static int array_push(stack *s, item_type *item)
      */
     stack_size_bytes = (s->stack_size * sizeof(item_type));
     if ((stack_size_bytes + sizeof(item_type)) > s->allocated_size_bytes) {
-        stk_ptr = realloc(s->stack_ptr, stack_size_bytes << 1);
+        stk_ptr = realloc(s->stack_ptr, s->allocated_size_bytes << 1);
         if (stk_ptr == NULL) {
             return ENOMEM;
         } else {
             s->allocated_ptr = stk_ptr;
-            s->allocated_size_bytes = stack_size_bytes;
+			s->allocated_size_bytes = s->allocated_size_bytes << 1;
             s->stack_ptr = (item_type *)stk_ptr + s->stack_size;
         }
     }
