@@ -4,34 +4,55 @@ public class Solver {
 	private int moves;
     public Solver(Board initial) {
 		// find a solution to the initial board (using the A* algorithm)
+		BOARD twinBoard = initial.twin();
 		boolean goal = false;
+		boolean twinGoal = false;
+		moves = 0;
+		int twinMoves = 0;
 		int priority = initial.hamming() + moves;
+		int twinPriority = twinBoard.hamming() + twinMoves;
 		int minPriority;
 		int neighborCount;
 		Board searchBoard;
+		Board twinSearchBoard;
+		Board []prevBoard = new Board[2];
 	 	BinarySearchST<Integer, Board> gameTree = new BinarySearchST<Integer, Board>();
 		MinPQ<Integer> neighborArbiter = new MinPQ<Integer>();
-		moves = 0;
+		/* Twin */
+	 	BinarySearchST<Integer, Board> twinGameTree =
+							new BinarySearchST<Integer, Board>();
+		MinPQ<Integer> twinNeighborArbiter = new MinPQ<Integer>();
+
 		gameTree.put(priority, initial);
 		neighborArbiter.insert(priority);
-		System.out.println("1");
+
+		/* Twin */
+		twinGameTree.put(twinPriority, twinBoard);
+		twinNeighborArbiter.insert(twinPriority);
+		//System.out.println("1");
+		prevBoard[0] = initial;
+		twinPrevBoard[0] = twinBoard;
 		while (true) {
-			System.out.println("2");
+			//System.out.println("2");
 			minPriority = neighborArbiter.delMin();
-			searchBoard = gameTree.get(minPriority).Board(null);
-			searchBoardStack.push(searchBoard);
+			searchBoard = gameTree.get(minPriority);
 			goal = searchBoard.isGoal();
-			if (goal) {
+			if (goal == true) {
 				break;
 			}
-			System.out.println("3");
+			prevBoard[1] = searchBoard;
+			searchBoardStack.push(searchBoard);
 			moves++;
 			neighborArbiter = new MinPQ<Integer>();
 			gameTree = new BinarySearchST<Integer, Board>();
 			neighborCount = 0;
 			for (Board neighborBoard : searchBoard.neighbors()) {
+				if (prevBoard[0].equals(neighborBoard) == true) {
+					//System.out.println("Equals");
+					continue;
+				}
 				if (neighborBoard != null) {
-					System.out.println("4");
+					//System.out.println("4");
 					neighborCount++;
 					priority = searchBoard.hamming() + moves;
 					neighborArbiter.insert(priority);
@@ -39,11 +60,51 @@ public class Solver {
 					//System.out.println(neighborBoard.toString());
 					//System.out.println(neighborBoard.hamming());
 				} else {
-					System.out.println("2");
+					//System.out.println("2");
 					break;
 				}
 			}
+			prevBoard[0] = prevBoard[1];
 			if (neighborCount == 0) {
+				break;
+			}
+
+			//System.out.println(searchBoard.toString());
+			minPriority = twinNeighborArbiter.delMin();
+			twinSearchBoard = twinGameTree.get(minPriority);
+			twinGoal = searchBoard.isGoal();
+			if (twinGoal == true) {
+				break;
+			}
+			twinPrevBoard[1] = twinSearchBoard;
+			twinSearchBoardStack.push(twinSearchBoard);
+			//System.out.println("3");
+			/* Initial Board processing */
+			/* Twin Board processing */
+			twinMoves++;
+			twinNeighborArbiter = new MinPQ<Integer>();
+			twinGameTree = new BinarySearchST<Integer, Board>();
+			twinNeighborCount = 0;
+			for (Board neighborBoard : twinSearchBoard.neighbors()) {
+				if (prevBoard[0].equals(neighborBoard) == true) {
+					System.out.println("Equals");
+					continue;
+				}
+				if (neighborBoard != null) {
+					//System.out.println("4");
+					twinNeighborCount++;
+					twinPriority = twinSearchBoard.hamming() + twinMoves;
+					twinNeighborArbiter.insert(twinPriority);
+					twinGameTree.put(twinPriority, twinNeighborBoard);
+					//System.out.println(neighborBoard.toString());
+					//System.out.println(neighborBoard.hamming());
+				} else {
+					//System.out.println("2");
+					break;
+				}
+			}
+			twinPrevBoard[0] = twinPrevBoard[1];
+			if (twinNeighborCount == 0) {
 				break;
 			}
 		}
@@ -51,34 +112,31 @@ public class Solver {
 
     public boolean isSolvable() {
 		// is the initial board solvable?
-		return true;
+		if ((goal == false)
+			&& (twinGoal == true)) {
+			return true;
+		}
 	}
     public int moves() {
 		// min number of moves to solve initial board; -1 if no solution
-		return moves;
+		if (goal == true) {
+			return moves;
+		} else if (twinGoal == true) {
+			return twinMoves;
+		}
+			return 0;
 	}
     public Iterable<Board> solution() {
   		// sequence of boards in a shortest solution; null if no solution
-		return searchBoardStack;
+		if (goal == true) {
+			return searchBoardStack;
+		} else if (twinGoal == true) {
+			return twinSearchBoardStack;
+		}
+		return null;
 	}
 
 	/************Helper APIs********************/
-
-	private int [][] toBlocks(BinarySearchST<Integer, Integer> bST) {
-		int size = bST.size() / 2;	
-		int [][]blocks = new int[size][size];
-		int refIndex;// = initBST.get(0);
-		int i;// = refIndex / size;
-		int j;// = refIndex - (i * size);
-
-		for (int key : bST.keys()) {
-			refIndex = bST.get(key);
-			i = refIndex / size;
-			j = refIndex - (i * size);
-			blocks[i][j] = key;
-		}
-	}
-	
     public static void main(String[] args) {
 		// solve a slider puzzle (given below)
 		// create initial board from file

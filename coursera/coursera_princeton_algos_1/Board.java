@@ -3,17 +3,16 @@ import java.util.NoSuchElementException;
 
 public class Board
 {
-    private int priority;
     private int moves;
-    private int size;
+    final private int size;
     private int refBlockRow;
     private int refBlockCol;
     
-    private BinarySearchST<Integer, Integer> initBST =
-                                        new BinarySearchST<Integer, Integer>();
+    //private BinarySearchST<Integer, Integer> initBST =
+    //                                    new BinarySearchST<Integer, Integer>();
     private ResizingArrayStack<Board> neighborStack =
                 new ResizingArrayStack<Board>();
-    private int [][]boardBlocks;
+    final private int [][]boardBlocks;
 
     /*private class BoardPriority implements Comparator<Board>
     {
@@ -52,11 +51,18 @@ public class Board
     public int hamming() {
         // number of blocks out of place
         int hammingPriority = 0;
-        for (int key : initBST.keys()) {
-            if (initBST.get(key) != key) {
-                hammingPriority++;
-            }
-        }
+        for (int i = 0; i < size; i++) {
+            for (int j = 0 ; j < size; j++) {
+				if ((i == size - 1)
+				   && (j == size - 1)) {
+					break;
+				}
+
+                if (boardBlocks[i][j] != ((i * size) + (j + 1))) {
+					hammingPriority++;
+				}
+			}
+		}
         return hammingPriority;
     }
 
@@ -94,30 +100,53 @@ public class Board
 
     public Board twin() {
         // a board obtained by exchanging two adjacent blocks in the same row
-        return null;
+		int [][]twinBlocks = int[size][size];
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				twinBlocks[i][j] = boardBlocks[i][j];
+			}
+		}
+		for (int i = 0; i < size; i++) {
+			if (i != refBlockRow) {
+				twinBlocks[i][0] = boardBlocks[i][1];
+				twinBlocks[i][1] = boardBlocks[i][0];
+			}
+		}
+
+		Board twinBoard = new Board(twinBlocks);
+        return twinBoard;
     }
 
     public boolean equals(Object y) {
         // does this board equal y?
+		Board comparedObject = (Board) y;
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				if (comparedObject.boardBlocks[i][j]
+					   	!= this.boardBlocks[i][j]) {
+					return false;
+				}
+			}
+		}
         return true;
     }
     
     public Iterable<Board> neighbors() {
         // all neighboring boards
-        int refIndex = initBST.get(0);
         int [][]neighborBlocks = new int[size][size];
         /* Create Neighbors and store it in the STACK */
         if (refBlockRow > 0) {
             //Up neighbor exists
+			//System.out.println("Up neighbor exist");
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
-                    if ((refBlockRow == (i + 1)) &&
+                    if ((refBlockRow == i) &&
                             (refBlockCol == j)) {
-                        neighborBlocks[i][j] = boardBlocks[i + 1][j];
-                        neighborBlocks[i + 1][j] = boardBlocks[i][j];
+                        neighborBlocks[i][j] = boardBlocks[i - 1][j];
+                        neighborBlocks[i - 1][j] = boardBlocks[i][j];
                     } else if (!(i == refBlockRow &&
                                  j == refBlockCol)) {
-                        neighborBlocks = boardBlocks[i + 1][j];
+                        neighborBlocks[i][j] = boardBlocks[i][j];
                     }
                 }
             }
@@ -126,91 +155,98 @@ public class Board
         }
 
         //if ((initBST.get(0) + size) < size * size) {
-        if (i < (size - 1)) {
+        if (refBlockRow < (size - 1)) {
             //bottom neighbor exist
+			//System.out.println("Bottom neighbor exist");
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
-                    if ((refBlockRow == (i - size)) &&
+                    if ((refBlockRow == i) &&
                             (refBlockCol == j)) {
-                        neighborBlocks[i][j] = boardBlocks[i - size][j];
+                        neighborBlocks[i][j] = boardBlocks[i + 1][j];
                         neighborBlocks[i + 1][j] = boardBlocks[i][j];
-                    } else if (!(i == refBlockRow &&
-                                 j == refBlockCol)) {
-                        neighborBlocks = boardBlocks[i + 1][j];
+                    } else if (!((i == refBlockRow
+							  || i == (refBlockRow + 1))
+							  && j == refBlockCol)) {
+                        neighborBlocks[i][j] = boardBlocks[i][j];
                     }
+					//System.out.println(neighborBlocks[i][j]);
                 }
             }
-            Board upBoard = new Board(neighborBlocks);
-            Board bottomBoard = new Board(null);
-            bottomBoard.boardBlocks = true;
-            bottomBoard.size = size;
-            for (int key : initBST.keys()) {
-                if (initBST.get(key) == (refIndex + size)) {
-                    bottomBoard.initBST.put(0, initBST.get(key));
-                    bottomBoard.initBST.put(key, refIndex);
-                } else {
-                    bottomBoard.initBST.put(key, initBST.get(key));
-                }
-            }
+            Board bottomBoard = new Board(neighborBlocks);
             neighborStack.push(bottomBoard);
         }
 
         //if (initBST.get(0) % size == 0) {
-        if (j == 0) {
+        if (refBlockCol == 0) {
             //Only right neighbor exist
-            Board rightBoard = new Board(null);
-            rightBoard.boardBlocks = true;
-            rightBoard.size = size;
-            for (int key : initBST.keys()) {
-                if (initBST.get(key) == (refIndex + 1)) {
-                    rightBoard.initBST.put(0, initBST.get(key));
-                    rightBoard.initBST.put(key, refIndex);
-                } else {
-                    rightBoard.initBST.put(key, initBST.get(key));
+			//System.out.println("Right neighbor exist");
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    if ((refBlockRow == i)
+						&& (refBlockCol == j)) {
+                        neighborBlocks[i][j] = boardBlocks[i][j + 1];
+                        neighborBlocks[i][j + 1] = boardBlocks[i][j];
+                    } else if (!(i == refBlockRow
+							  && (j == refBlockCol
+							  || j == (refBlockCol + 1)))) {
+                        neighborBlocks[i][j] = boardBlocks[i][j];
+                    }
                 }
             }
+            Board rightBoard = new Board(neighborBlocks);
             neighborStack.push(rightBoard);
         //} else if (initBST.get(0) % (size - 1) == 0) {
-        } else if (j == (size - 1)) {
+        } else if (refBlockCol == (size - 1)) {
             //Only left neighbor exist
-            Board leftBoard = new Board(null);
-            leftBoard.boardBlocks = true;
-            leftBoard.size = size;
-            for (int key : initBST.keys()) {
-                if (initBST.get(key) == (refIndex - 1)) {
-                    leftBoard.initBST.put(0, initBST.get(key));
-                    leftBoard.initBST.put(key, refIndex);
-                } else {
-                    leftBoard.initBST.put(key, initBST.get(key));
+			//System.out.println("Left neighbor exist");
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    if ((refBlockRow == i)
+						&& (refBlockCol == j)) {
+                        neighborBlocks[i][j] = boardBlocks[i][j - 1];
+                        neighborBlocks[i][j - 1] = boardBlocks[i][j];
+                    } else if (!(i == refBlockRow
+							  && j == refBlockCol
+							  || j == (refBlockCol - 1))) {
+                        neighborBlocks[i][j] = boardBlocks[i][j];
+                    }
                 }
             }
+            Board leftBoard = new Board(neighborBlocks);
             neighborStack.push(leftBoard);
         } else {
             //Both right and left neighbor exist
-            Board rightBoard = new Board(null);
-            Board leftBoard = new Board(null);
-            rightBoard.boardBlocks = true;
-            rightBoard.size = size;
-            leftBoard.boardBlocks = true;
-            leftBoard.size = size;
-
-            for (int key : initBST.keys()) {
-                if ((initBST.get(key) == (refIndex + 1))) {
-                    rightBoard.initBST.put(0, initBST.get(key));
-                    rightBoard.initBST.put(key, refIndex);
-                } else {
-                    rightBoard.initBST.put(key, initBST.get(key));
-                } 
-            }
-            for (int key : initBST.keys()) {
-                 if (initBST.get(key) == (refIndex - 1)) {
-                    leftBoard.initBST.put(0, initBST.get(key));
-                    leftBoard.initBST.put(key, refIndex);
-                } else {
-                    leftBoard.initBST.put(key, initBST.get(key));
+			//System.out.println("Both right and left neighbor exist");
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    if ((refBlockRow == i)
+						&& (refBlockCol == j)) {
+                        neighborBlocks[i][j] = boardBlocks[i][j + 1];
+                        neighborBlocks[i][j + 1] = boardBlocks[i][j];
+                    } else if (!(i == refBlockRow
+							  && j == refBlockCol
+							  || j == (refBlockCol + 1))) {
+                        neighborBlocks[i][j] = boardBlocks[i][j];
+                    }
                 }
             }
+            Board rightBoard = new Board(neighborBlocks);
             neighborStack.push(rightBoard);
+
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    if ((refBlockRow == i)
+						&& (refBlockCol == j)) {
+                        neighborBlocks[i][j] = boardBlocks[i][j - 1];
+                        neighborBlocks[i][j - 1] = boardBlocks[i][j];
+                    } else if (!(i == refBlockRow
+							  && j == refBlockCol
+							  || j == (refBlockCol - 1))) {
+                        neighborBlocks[i][j] = boardBlocks[i][j];
+                    }
+                }
+            }
+            Board leftBoard = new Board(neighborBlocks);
             neighborStack.push(leftBoard);
         }
         return neighborStack;
@@ -219,17 +255,14 @@ public class Board
     public String toString() {
         // string representation of the board (in the output format specified below)
         StringBuilder s = new StringBuilder();
-        int []board = new int[size * size];
         s.append(size + "\n");
-        for (int key : initBST.keys()) {
-            board[initBST.get(key)] = key;
-        }
 
-        for (int i = 0; i < size * size; i++) {
-            if (i % size == 0) {
-                s.append("\n");
-            }
-            s.append(String.format("%2d ", board[i]));
+        for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				//System.out.println(boardBlocks[i][j]);
+				s.append(String.format("%2d ", boardBlocks[i][j]));
+			}
+			s.append("\n");
         }
         return s.toString();
     }
@@ -248,8 +281,8 @@ public class Board
         //System.out.println(initial.isGoal());
         for (Board neighborBoard : initial.neighbors()) {
             if (neighborBoard != null) {
-                //System.out.println(neighborBoard.toString());
-                //System.out.println(neighborBoard.hamming());
+                System.out.println(neighborBoard.toString());
+                System.out.println(neighborBoard.hamming());
             } else {
                 break;
             }
