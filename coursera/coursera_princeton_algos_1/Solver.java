@@ -1,47 +1,64 @@
 public class Solver {
 	private ResizingArrayStack<Board> searchBoardStack =
 						new ResizingArrayStack<Board>();
+	private ResizingArrayStack<Board> twinSearchBoardStack =
+						new ResizingArrayStack<Board>();
 	private int moves;
+	private int twinMoves;
+	private boolean goal = false;
+	private boolean twinGoal = false;
+
+	private class BoardSolver {
+	 	private BinarySearchST<Integer, Board> gameTree = 
+		 				 		 new BinarySearchST<Integer, Board>();
+		private MinPQ<Integer> neighborArbiter = new MinPQ<Integer>();
+		private Board []prevBoard = new Board[2];
+		private Board searchBoard;
+		private int priority;
+		private int minPriority;
+		private bool goal;
+
+		public BoardSolver(Board board) {
+			prevBoard[0] = board;
+			priority = board.hamming();
+			gameTree.put(priority, board);
+			neighborArbiter.insert(priority);
+		}
+
+		public boolean isGoal() {
+			minPriority = neighborArbiter.delMin();
+			searchBoard = gameTree.get(minPriority);
+			goal = searchBoard.isGoal();
+			prevBoard[1] = searchBoard;
+			searchBoardStack.push(searchBoard);
+		}
+	}
+
     public Solver(Board initial) {
 		// find a solution to the initial board (using the A* algorithm)
-		BOARD twinBoard = initial.twin();
-		boolean goal = false;
-		boolean twinGoal = false;
+		Board twinBoard = initial.twin();
 		moves = 0;
-		int twinMoves = 0;
+		twinMoves = 0;
+		goal = false;
+		twinGoal = false;
 		int priority = initial.hamming() + moves;
 		int twinPriority = twinBoard.hamming() + twinMoves;
 		int minPriority;
 		int neighborCount;
+		int twinNeighborCount;
 		Board searchBoard;
 		Board twinSearchBoard;
-		Board []prevBoard = new Board[2];
-	 	BinarySearchST<Integer, Board> gameTree = new BinarySearchST<Integer, Board>();
-		MinPQ<Integer> neighborArbiter = new MinPQ<Integer>();
-		/* Twin */
-	 	BinarySearchST<Integer, Board> twinGameTree =
-							new BinarySearchST<Integer, Board>();
-		MinPQ<Integer> twinNeighborArbiter = new MinPQ<Integer>();
-
-		gameTree.put(priority, initial);
-		neighborArbiter.insert(priority);
-
-		/* Twin */
-		twinGameTree.put(twinPriority, twinBoard);
-		twinNeighborArbiter.insert(twinPriority);
-		//System.out.println("1");
-		prevBoard[0] = initial;
-		twinPrevBoard[0] = twinBoard;
 		while (true) {
-			//System.out.println("2");
+			//System.out.println("Processing Initial");
 			minPriority = neighborArbiter.delMin();
 			searchBoard = gameTree.get(minPriority);
 			goal = searchBoard.isGoal();
+			prevBoard[1] = searchBoard;
+			searchBoardStack.push(searchBoard);
+			//System.out.println(searchBoard.toString());
 			if (goal == true) {
 				break;
 			}
-			prevBoard[1] = searchBoard;
-			searchBoardStack.push(searchBoard);
 			moves++;
 			neighborArbiter = new MinPQ<Integer>();
 			gameTree = new BinarySearchST<Integer, Board>();
@@ -69,15 +86,16 @@ public class Solver {
 				break;
 			}
 
-			//System.out.println(searchBoard.toString());
+			//System.out.println("Processing Twin");
 			minPriority = twinNeighborArbiter.delMin();
 			twinSearchBoard = twinGameTree.get(minPriority);
-			twinGoal = searchBoard.isGoal();
+			//System.out.println(twinSearchBoard.toString());
+			twinGoal = twinSearchBoard.isGoal();
+			twinPrevBoard[1] = twinSearchBoard;
+			twinSearchBoardStack.push(twinSearchBoard);
 			if (twinGoal == true) {
 				break;
 			}
-			twinPrevBoard[1] = twinSearchBoard;
-			twinSearchBoardStack.push(twinSearchBoard);
 			//System.out.println("3");
 			/* Initial Board processing */
 			/* Twin Board processing */
@@ -86,8 +104,11 @@ public class Solver {
 			twinGameTree = new BinarySearchST<Integer, Board>();
 			twinNeighborCount = 0;
 			for (Board neighborBoard : twinSearchBoard.neighbors()) {
-				if (prevBoard[0].equals(neighborBoard) == true) {
-					System.out.println("Equals");
+				if (twinPrevBoard[0].equals(neighborBoard) == true) {
+					//System.out.println("Equals");
+					//System.out.println(twinPrevBoard[0].toString());
+					//System.out.println("Neighbor");
+					//System.out.println(neighborBoard.toString());
 					continue;
 				}
 				if (neighborBoard != null) {
@@ -95,7 +116,7 @@ public class Solver {
 					twinNeighborCount++;
 					twinPriority = twinSearchBoard.hamming() + twinMoves;
 					twinNeighborArbiter.insert(twinPriority);
-					twinGameTree.put(twinPriority, twinNeighborBoard);
+					twinGameTree.put(twinPriority, neighborBoard);
 					//System.out.println(neighborBoard.toString());
 					//System.out.println(neighborBoard.hamming());
 				} else {
@@ -112,9 +133,11 @@ public class Solver {
 
     public boolean isSolvable() {
 		// is the initial board solvable?
-		if ((goal == false)
-			&& (twinGoal == true)) {
+		System.out.println("Goal " + goal + "TwinGoal " + twinGoal);
+		if (goal == true) {
 			return true;
+		} else {
+			return false;
 		}
 	}
     public int moves() {
