@@ -20,7 +20,7 @@ public class Solver {
         public BoardSolver(Board board) {
             int priority;
             prevBoard[0] = board;
-            priority = board.hamming();
+            priority = board.manhattan();
             gameTree.put(priority, board);
             neighborArbiter.insert(priority);
         }
@@ -47,7 +47,7 @@ public class Solver {
                 if (neighborBoard != null) {
                     //System.out.println("4");
                     neighborCount++;
-                    priority = neighborBoard.hamming() + moves;
+                    priority = neighborBoard.manhattan() + moves;
                     neighborArbiter.insert(priority);
                     gameTree.put(priority, neighborBoard);
                     //System.out.println(neighborBoard.toString());

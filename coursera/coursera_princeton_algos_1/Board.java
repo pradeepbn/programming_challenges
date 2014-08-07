@@ -1,37 +1,26 @@
-import java.util.Comparator;
-import java.util.NoSuchElementException;
-import java.lang.*;
+//import java.lang.Math;
+import java.util.Arrays;
 
 public class Board
 {
-    private int moves;
-    final private int size;
     private int refBlockRow;
     private int refBlockCol;
     
-    //private BinarySearchST<Integer, Integer> initBST =
-    //                                    new BinarySearchST<Integer, Integer>();
     private ResizingArrayStack<Board> neighborStack =
                 new ResizingArrayStack<Board>();
     final private int [][]boardBlocks;
-
-    /*private class BoardPriority implements Comparator<Board>
-    {
-        public int compare(Board b, Board c) {
-            if ((b.hamming() + b.moves) < (c.hamming() + c.moves)) {
-                return 1;
-            } else if ((b.hamming() + b.moves) > (c.hamming() + c.moves)) {
-                return -1;
-            } else {
-                return 0;
-            }
-        }
-    }*/
+    final private int size;
 
     public Board(int[][] blocks) {
         // construct a board from an N-by-N array of blocks
         // (where blocks[i][j] = block in row i, column j)
-        size = blocks.length;
+		if (blocks.length == blocks[1].length) {
+			size = blocks[0].length;
+		} else if (blocks == null){
+			throw new IllegalArgumentException("Illegal value of the argument"); 
+		} else {
+			throw new IllegalArgumentException("Illegal value of the argument"); 
+		}
         boardBlocks = new int[size][size];
         for (int i = 0; i < size; i++) {
             for (int j = 0 ; j < size; j++) {
@@ -60,7 +49,6 @@ public class Board
                 }
 
                 if (boardBlocks[i][j] != ((i * size) + (j + 1))) {
-					//System.out.println(boardBlocks[i][j] + " " + ((i * size) + (j + 1)));
 					hammingPriority++;
 				}
 			}
@@ -98,8 +86,8 @@ public class Board
 
     public boolean isGoal() {
         // is this board the goal board?
-        //if (hamming() == 0) {
         if (manhattan() == 0) {
+        //if (hamming() == 0) {
             return true;
         } else {
             return false;
@@ -127,8 +115,10 @@ public class Board
     }
 
     public boolean equals(Object y) {
-        // does this board equal y?
+		if ( !(y instanceof Board) ) return false;
 		Board comparedObject = (Board) y;
+
+		//return deepEquals(this.boardBlocks, comparedObject.boardBlocks);
 		boolean isEquals = true;
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
@@ -140,7 +130,7 @@ public class Board
 		}
         return isEquals;
     }
-    
+	
     public Iterable<Board> neighbors() {
         // all neighboring boards
         int [][]neighborBlocks = new int[size][size];
@@ -292,13 +282,13 @@ public class Board
             for (int j = 0; j < N; j++)
                 blocks[i][j] = in.readInt();
         Board initial = new Board(blocks);
-        System.out.println(initial.toString());
-        System.out.println(initial.hamming());
+        //System.out.println(initial.toString());
+        //System.out.println(initial.hamming());
         //System.out.println(initial.isGoal());
         for (Board neighborBoard : initial.neighbors()) {
             if (neighborBoard != null) {
-                System.out.println(initial.equals(neighborBoard));
-				System.out.println(neighborBoard.toString());
+                //System.out.println(initial.equals(neighborBoard));
+				//System.out.println(neighborBoard.toString());
                 //System.out.println(neighborBoard.hamming());
             } else {
                 break;
