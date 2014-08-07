@@ -1,5 +1,6 @@
 import java.util.Comparator;
 import java.util.NoSuchElementException;
+import java.lang.*;
 
 public class Board
 {
@@ -42,7 +43,7 @@ public class Board
             }
         }
     }
-                                           
+
     public int dimension() {
         // board dimension N
         return size;
@@ -53,10 +54,10 @@ public class Board
         int hammingPriority = 0;
         for (int i = 0; i < size; i++) {
             for (int j = 0 ; j < size; j++) {
-				if ((i == size - 1)
-				   && (j == size - 1)) {
-					break;
-				}
+                if ((i == size - 1)
+                   && (j == size - 1)) {
+                    break;
+                }
 
                 if (boardBlocks[i][j] != ((i * size) + (j + 1))) {
 					//System.out.println(boardBlocks[i][j] + " " + ((i * size) + (j + 1)));
@@ -70,29 +71,35 @@ public class Board
     public int manhattan() {
         // sum of Manhattan distances between blocks and goal
         int manhattanPriority = 0;
-        /*int boardValue;
-        for (int k = 1; k < size * size; k++) {
-            boardValue = boardBlocks[k];
-            if (boardValue != k) {
-                if ((boardValue - size) > 0) {
-                    if ((boardValue - size) > size) {
-                        while ((boardValue - size) > 0) {
-                            manhattanPriority++;
-                            boardValue = boardValue - size;
-                        }
-                        boardValue = boardValue + size;
-                    }
-                    while (boardValue-- != k) {
-                    }
+        int refValueRow, refValueCol;
+        int boardValue;
+
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                boardValue = boardBlocks[i][j];
+                //if (boardValue !=
+                 //       (i * size) + j + 1) {
+                if (boardValue != 0) {
+                    //System.out.println(boardValue + " " + ((i * size) + j + 1));
+                    refValueRow = (int) Math.ceil((double) boardValue / (double)size) - 1;
+                    refValueRow = refValueRow < 0 ? 0 : refValueRow;
+                    refValueCol = (boardValue - 1 - (refValueRow * size));
+                    refValueCol = (refValueCol < 0) ? 0 : refValueCol;
+                    //System.out.println(refValueRow + " " + refValueCol);
+                    manhattanPriority += Math.abs(refValueRow - i)
+                                        + Math.abs(refValueCol - j);
+                    //System.out.println("P" + manhattanPriority);
+                    //System.out.println();
                 }
             }
-        }*/
-        return 0;
+        }
+        return manhattanPriority;
     }
 
     public boolean isGoal() {
         // is this board the goal board?
-        if (hamming() == 0) {
+        //if (hamming() == 0) {
+        if (manhattan() == 0) {
             return true;
         } else {
             return false;
@@ -115,7 +122,7 @@ public class Board
 			}
 		}
 
-		Board twinBoard = new Board(twinBlocks);
+        Board twinBoard = new Board(twinBlocks);
         return twinBoard;
     }
 
@@ -140,7 +147,7 @@ public class Board
         /* Create Neighbors and store it in the STACK */
         if (refBlockRow > 0) {
             //Up neighbor exists
-			//System.out.println("Up neighbor exist");
+            //System.out.println("Up neighbor exist");
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
                     if ((refBlockRow == i) &&
@@ -161,7 +168,7 @@ public class Board
         //if ((initBST.get(0) + size) < size * size) {
         if (refBlockRow < (size - 1)) {
             //bottom neighbor exist
-			//System.out.println("Bottom neighbor exist");
+            //System.out.println("Bottom neighbor exist");
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
                     if ((refBlockRow == i) &&
@@ -169,11 +176,11 @@ public class Board
                         neighborBlocks[i][j] = boardBlocks[i + 1][j];
                         neighborBlocks[i + 1][j] = boardBlocks[i][j];
                     } else if (!((i == refBlockRow
-							  || i == (refBlockRow + 1))
-							  && j == refBlockCol)) {
+                              || i == (refBlockRow + 1))
+                              && j == refBlockCol)) {
                         neighborBlocks[i][j] = boardBlocks[i][j];
                     }
-					//System.out.println(neighborBlocks[i][j]);
+                    //System.out.println(neighborBlocks[i][j]);
                 }
             }
             Board bottomBoard = new Board(neighborBlocks);
@@ -184,16 +191,16 @@ public class Board
         //if (initBST.get(0) % size == 0) {
         if (refBlockCol == 0) {
             //Only right neighbor exist
-			//System.out.println("Right neighbor exist");
+            //System.out.println("Right neighbor exist");
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
                     if ((refBlockRow == i)
-						&& (refBlockCol == j)) {
+                        && (refBlockCol == j)) {
                         neighborBlocks[i][j] = boardBlocks[i][j + 1];
                         neighborBlocks[i][j + 1] = boardBlocks[i][j];
                     } else if (!(i == refBlockRow
-							  && (j == refBlockCol
-							  || j == (refBlockCol + 1)))) {
+                              && (j == refBlockCol
+                              || j == (refBlockCol + 1)))) {
                         neighborBlocks[i][j] = boardBlocks[i][j];
                     }
                 }
@@ -204,16 +211,16 @@ public class Board
         //} else if (initBST.get(0) % (size - 1) == 0) {
         } else if (refBlockCol == (size - 1)) {
             //Only left neighbor exist
-			//System.out.println("Left neighbor exist");
+            //System.out.println("Left neighbor exist");
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
                     if ((refBlockRow == i)
-						&& (refBlockCol == j)) {
+                        && (refBlockCol == j)) {
                         neighborBlocks[i][j] = boardBlocks[i][j - 1];
                         neighborBlocks[i][j - 1] = boardBlocks[i][j];
                     } else if (!(i == refBlockRow
-							  && j == refBlockCol
-							  || j == (refBlockCol - 1))) {
+                              && j == refBlockCol
+                              || j == (refBlockCol - 1))) {
                         neighborBlocks[i][j] = boardBlocks[i][j];
                     }
                 }
@@ -223,16 +230,16 @@ public class Board
             neighborStack.push(leftBoard);
         } else {
             //Both right and left neighbor exist
-			//System.out.println("Both right and left neighbor exist");
+            //System.out.println("Both right and left neighbor exist");
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
                     if ((refBlockRow == i)
-						&& (refBlockCol == j)) {
+                        && (refBlockCol == j)) {
                         neighborBlocks[i][j] = boardBlocks[i][j + 1];
                         neighborBlocks[i][j + 1] = boardBlocks[i][j];
                     } else if (!(i == refBlockRow
-							  && j == refBlockCol
-							  || j == (refBlockCol + 1))) {
+                              && j == refBlockCol
+                              || j == (refBlockCol + 1))) {
                         neighborBlocks[i][j] = boardBlocks[i][j];
                     }
                 }
@@ -244,12 +251,12 @@ public class Board
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
                     if ((refBlockRow == i)
-						&& (refBlockCol == j)) {
+                        && (refBlockCol == j)) {
                         neighborBlocks[i][j] = boardBlocks[i][j - 1];
                         neighborBlocks[i][j - 1] = boardBlocks[i][j];
                     } else if (!(i == refBlockRow
-							  && j == refBlockCol
-							  || j == (refBlockCol - 1))) {
+                              && j == refBlockCol
+                              || j == (refBlockCol - 1))) {
                         neighborBlocks[i][j] = boardBlocks[i][j];
                     }
                 }
@@ -267,11 +274,11 @@ public class Board
         s.append(size + "\n");
 
         for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
-				//System.out.println(boardBlocks[i][j]);
-				s.append(String.format("%2d ", boardBlocks[i][j]));
-			}
-			s.append("\n");
+            for (int j = 0; j < size; j++) {
+                //System.out.println(boardBlocks[i][j]);
+                s.append(String.format("%2d ", boardBlocks[i][j]));
+            }
+            s.append("\n");
         }
         return s.toString();
     }
