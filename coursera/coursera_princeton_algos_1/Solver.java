@@ -10,26 +10,47 @@ public class Solver {
         private BinarySearchST<Integer, Board> gameTree =
                                    new BinarySearchST<Integer, Board>();
         private MinPQ<Integer> neighborArbiter = new MinPQ<Integer>();
+        private SET<TreeSet> setPQ = new SET<TreeSet>();
         private ResizingArrayStack<Board> searchBoardStack =
                             new ResizingArrayStack<Board>();
-        private Board []prevBoard = new Board[2];
+        private TreeSet []prevBoard = new TreeSet[2];
         private Board searchBoard;
-        private int minPriority;
         private boolean goal;
+        private class TreeSet Implements comparable<TreeSet> {
+            private Board b;
+            public TreeSet(Board board) {
+                b = board;
+            }
+
+            public int compareTo(TreeSet that) {
+                if (this.b.priority < that.b.priority) {
+                    return -1;
+                } else if (this.b.priority > that.b.priority) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        }
 
         public BoardSolver(Board board) {
             int priority;
-            prevBoard[0] = board;
-            priority = board.hamming();
+
+            prevBoard[0] = new TreeSet(board);
+            priority = board.priority;
             gameTree.put(priority, board);
-            neighborArbiter.insert(priority);
+            setPQ.add(prevBoard[0]);
+            //neighborArbiter.insert(priority);
         }
 
         public boolean isGoal() {
             int priority;
             int neighborCount;
-            minPriority = neighborArbiter.delMin();
-            searchBoard = gameTree.get(minPriority);
+            TreeSet minPrioritySet;
+
+           // minPriority = neighborArbiter.delMin();
+            minPrioritySet = setPW.min();
+            searchBoard = gameTree.get(minPrioritySet.b.priority);
             goal = searchBoard.isGoal();
             prevBoard[1] = searchBoard;
             searchBoardStack.push(searchBoard);
