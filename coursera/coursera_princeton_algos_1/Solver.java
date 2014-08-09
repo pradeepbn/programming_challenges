@@ -35,9 +35,8 @@ public class Solver {
 
         public BoardSolver(Board board) {
             int priority;
-
-            prevBoard[0] = new TreeSet(board);
-            priority = board.priority;
+            prevBoard[0] = board;
+            priority = board.manhattan();
             gameTree.put(priority, board);
             setPQ.add(prevBoard[0]);
             //neighborArbiter.insert(priority);
@@ -68,7 +67,7 @@ public class Solver {
                 if (neighborBoard != null) {
                     //System.out.println("4");
                     neighborCount++;
-                    priority = neighborBoard.hamming() + moves;
+                    priority = neighborBoard.manhattan() + moves;
                     neighborArbiter.insert(priority);
                     gameTree.put(priority, neighborBoard);
                     //System.out.println(neighborBoard.toString());

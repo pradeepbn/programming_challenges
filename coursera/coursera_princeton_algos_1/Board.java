@@ -1,37 +1,26 @@
-import java.util.Comparator;
-import java.util.NoSuchElementException;
-import java.lang.*;
+//import java.lang.Math;
+import java.util.Arrays;
 
 public class Board
 {
-    private int moves;
-    final private int size;
     private int refBlockRow;
     private int refBlockCol;
     
-    //private BinarySearchST<Integer, Integer> initBST =
-    //                                    new BinarySearchST<Integer, Integer>();
     private ResizingArrayStack<Board> neighborStack =
                 new ResizingArrayStack<Board>();
     final private int [][]boardBlocks;
-
-    /*private class BoardPriority implements Comparator<Board>
-    {
-        public int compare(Board b, Board c) {
-            if ((b.hamming() + b.moves) < (c.hamming() + c.moves)) {
-                return 1;
-            } else if ((b.hamming() + b.moves) > (c.hamming() + c.moves)) {
-                return -1;
-            } else {
-                return 0;
-            }
-        }
-    }*/
+    final private int size;
 
     public Board(int[][] blocks) {
         // construct a board from an N-by-N array of blocks
         // (where blocks[i][j] = block in row i, column j)
-        size = blocks.length;
+		if (blocks.length == blocks[1].length) {
+			size = blocks[0].length;
+		} else if (blocks == null){
+			throw new IllegalArgumentException("Illegal value of the argument"); 
+		} else {
+			throw new IllegalArgumentException("Illegal value of the argument"); 
+		}
         boardBlocks = new int[size][size];
         for (int i = 0; i < size; i++) {
             for (int j = 0 ; j < size; j++) {
@@ -60,10 +49,10 @@ public class Board
                 }
 
                 if (boardBlocks[i][j] != ((i * size) + (j + 1))) {
-                    hammingPriority++;
-                }
-            }
-        }
+					hammingPriority++;
+				}
+			}
+		}
         return hammingPriority;
     }
 
@@ -97,8 +86,8 @@ public class Board
 
     public boolean isGoal() {
         // is this board the goal board?
-        //if (hamming() == 0) {
         if (manhattan() == 0) {
+        //if (hamming() == 0) {
             return true;
         } else {
             return false;
@@ -107,38 +96,41 @@ public class Board
 
     public Board twin() {
         // a board obtained by exchanging two adjacent blocks in the same row
-        int [][]twinBlocks = new int[size][size];
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                twinBlocks[i][j] = boardBlocks[i][j];
-            }
-        }
-        for (int i = 0; i < size; i++) {
-            if (i != refBlockRow) {
-                twinBlocks[i][0] = boardBlocks[i][1];
-                twinBlocks[i][1] = boardBlocks[i][0];
-                break;
-            }
-        }
+		int [][]twinBlocks = new int[size][size];
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				twinBlocks[i][j] = boardBlocks[i][j];
+			}
+		}
+		for (int i = 0; i < size; i++) {
+			if (i != refBlockRow) {
+				twinBlocks[i][0] = boardBlocks[i][1];
+				twinBlocks[i][1] = boardBlocks[i][0];
+				break;
+			}
+		}
 
         Board twinBoard = new Board(twinBlocks);
         return twinBoard;
     }
 
     public boolean equals(Object y) {
-        // does this board equal y?
-        Board comparedObject = (Board) y;
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                if (comparedObject.boardBlocks[i][j]
-                           != this.boardBlocks[i][j]) {
-                    return false;
-                }
-            }
-        }
-        return true;
+		if ( !(y instanceof Board) ) return false;
+		Board comparedObject = (Board) y;
+
+		//return deepEquals(this.boardBlocks, comparedObject.boardBlocks);
+		boolean isEquals = true;
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				if (comparedObject.boardBlocks[i][j]
+					   	!= this.boardBlocks[i][j]) {
+					isEquals = false;
+				}
+			}
+		}
+        return isEquals;
     }
-    
+	
     public Iterable<Board> neighbors() {
         // all neighboring boards
         int [][]neighborBlocks = new int[size][size];
@@ -159,6 +151,7 @@ public class Board
                 }
             }
             Board upBoard = new Board(neighborBlocks);
+			//System.out.println(upBoard.toString());
             neighborStack.push(upBoard);
         }
 
@@ -181,6 +174,7 @@ public class Board
                 }
             }
             Board bottomBoard = new Board(neighborBlocks);
+			//System.out.println(bottomBoard.toString());
             neighborStack.push(bottomBoard);
         }
 
@@ -202,6 +196,7 @@ public class Board
                 }
             }
             Board rightBoard = new Board(neighborBlocks);
+			//System.out.println(rightBoard.toString());
             neighborStack.push(rightBoard);
         //} else if (initBST.get(0) % (size - 1) == 0) {
         } else if (refBlockCol == (size - 1)) {
@@ -221,6 +216,7 @@ public class Board
                 }
             }
             Board leftBoard = new Board(neighborBlocks);
+			//System.out.println(leftBoard.toString());
             neighborStack.push(leftBoard);
         } else {
             //Both right and left neighbor exist
@@ -239,6 +235,7 @@ public class Board
                 }
             }
             Board rightBoard = new Board(neighborBlocks);
+			//System.out.println(rightBoard.toString());
             neighborStack.push(rightBoard);
 
             for (int i = 0; i < size; i++) {
@@ -255,6 +252,7 @@ public class Board
                 }
             }
             Board leftBoard = new Board(neighborBlocks);
+			//System.out.println(leftBoard.toString());
             neighborStack.push(leftBoard);
         }
         return neighborStack;
@@ -286,14 +284,12 @@ public class Board
         Board initial = new Board(blocks);
         //System.out.println(initial.toString());
         //System.out.println(initial.hamming());
-        System.out.println(initial.manhattan());
         //System.out.println(initial.isGoal());
         for (Board neighborBoard : initial.neighbors()) {
             if (neighborBoard != null) {
-                //System.out.println(neighborBoard.toString());
+                //System.out.println(initial.equals(neighborBoard));
+				//System.out.println(neighborBoard.toString());
                 //System.out.println(neighborBoard.hamming());
-                //System.out.println(neighborBoard.manhattan());
-                //System.out.println();
             } else {
                 break;
             }
