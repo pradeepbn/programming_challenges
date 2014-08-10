@@ -16,16 +16,24 @@ public class Solver {
         private TreeSet []prevBoard = new TreeSet[2];
         private Board searchBoard;
         private boolean goal;
+		private TreeSet minPrioritySet;
+
         private class TreeSet Implements comparable<TreeSet> {
-            private Board b;
+            public Board b;
+			private int hammingPriority;
+			private int manhattanPriority;
+			private int priority;
             public TreeSet(Board board) {
                 b = board;
+				this.hammingPriority = b.hamming();
+				this.manhattanPriority = b.manhattan();
+				this.priority = b.manhattan();
             }
 
             public int compareTo(TreeSet that) {
-                if (this.b.priority < that.b.priority) {
+                if (this.manhattanPriority < that.manhattanPriority) {
                     return -1;
-                } else if (this.b.priority > that.b.priority) {
+                } else if (this.manhattanPriority < that.manhattanPriority) {
                     return 1;
                 } else {
                     return 0;
@@ -35,40 +43,40 @@ public class Solver {
 
         public BoardSolver(Board board) {
             int priority;
-            prevBoard[0] = board;
-            priority = board.manhattan();
+		
+            priority = prevBoard[0].b.priority + moves;
             gameTree.put(priority, board);
+            prevBoard[0] = new TreeSet(board);
+			minPrioritySet = prevBoard[0];
             setPQ.add(prevBoard[0]);
             //neighborArbiter.insert(priority);
         }
 
         public boolean isGoal() {
             int priority;
-            int neighborCount;
-            TreeSet minPrioritySet;
+			Board minPriorityBoard;
 
            // minPriority = neighborArbiter.delMin();
-            minPrioritySet = setPW.min();
-            searchBoard = gameTree.get(minPrioritySet.b.priority);
-            goal = searchBoard.isGoal();
-            prevBoard[1] = searchBoard;
-            searchBoardStack.push(searchBoard);
+			minPriority = gameTree.min();
+			minPriorityBoard = gameTree.get(minPriority);
+            setPQ.add(new TreeSet(minPriorityBoard));
 
-            neighborArbiter = null;
+			minPrioritySet = setPQ.min();
+			searchBoard = minPrioritySet.b;
+            goal = searchBoard.isGoal();
+            prevBoard[1] = minPrioritySet;
+
             gameTree = null;
-            neighborArbiter = new MinPQ<Integer>();
             gameTree = new BinarySearchST<Integer, Board>();
-            neighborCount = 0;
             for (Board neighborBoard : searchBoard.neighbors()) {
-                if (prevBoard[0].equals(neighborBoard) == true) {
+                if (prevBoard[0].b.equals(neighborBoard) == true) {
                     //System.out.println("Equals");
                     continue;
                 }
                 if (neighborBoard != null) {
                     //System.out.println("4");
-                    neighborCount++;
                     priority = neighborBoard.manhattan() + moves;
-                    neighborArbiter.insert(priority);
+                    //neighborArbiter.insert(priority);
                     gameTree.put(priority, neighborBoard);
                     //System.out.println(neighborBoard.toString());
                     //System.out.println(neighborBoard.hamming());

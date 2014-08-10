@@ -9,78 +9,69 @@ public class Board
     private ResizingArrayStack<Board> neighborStack =
                 new ResizingArrayStack<Board>();
     final private int [][]boardBlocks;
-    final private int size;
+    final private int rowSize;
+    final private int colSize;
+	private int hammingPriority;
+	private int manhattanPriority;
 
     public Board(int[][] blocks) {
         // construct a board from an N-by-N array of blocks
         // (where blocks[i][j] = block in row i, column j)
-		if (blocks.length == blocks[1].length) {
-			size = blocks[0].length;
-		} else if (blocks == null){
-			throw new IllegalArgumentException("Illegal value of the argument"); 
-		} else {
-			throw new IllegalArgumentException("Illegal value of the argument"); 
+		int tempBlock;
+        int refValueRow, refValueCol;
+		rowSize = blocks.length;
+		colSize = blocks[0].length;
+
+		if (rowSize == 0 
+			|| colSize == 0) {
+			throw new IllegalArgumentException("Expected Non-zero row/ column");
 		}
-        boardBlocks = new int[size][size];
-        for (int i = 0; i < size; i++) {
-            for (int j = 0 ; j < size; j++) {
+		hammingPriority = 0;
+		manhattanPriority = 0;
+        boardBlocks = new int[rowSize][colSize];
+        for (int i = 0; i < rowSize; i++) {
+            for (int j = 0 ;j < colSize; j++) {
+				tempBlock = blocks[i][j];	
                 boardBlocks[i][j] = blocks[i][j];
                 if (blocks[i][j] == 0) {
                     refBlockRow = i;
                     refBlockCol = j;
                 }
+
+				/* Compute the hamming priority */
+				if (tempBlock != 0) {
+					if (tempBlock != ((i * rowSize) + (j + 1))) {
+						hammingPriority++;
+					}
+				/*} else {
+					if ((i != rowSize - 1)
+						&& (j != colSize - 1)) {
+							hammingPriority++;
+						}*/
+				/* Compute the Manhattan priority */
+                    refValueRow = (int) Math.ceil((double) tempBlock / (double)rowSize) - 1;
+                    refValueRow = refValueRow < 0 ? 0 : refValueRow;
+                    refValueCol = (tempBlock - 1 - (refValueRow * rowSize));
+                    refValueCol = (refValueCol < 0) ? 0 : refValueCol;
+                    manhattanPriority += (Math.abs(refValueRow - i)
+                                         + Math.abs(refValueCol - j));
+				}
             }
         }
     }
 
     public int dimension() {
         // board dimension N
-        return size;
+        return rowSize;
     }
 
     public int hamming() {
         // number of blocks out of place
-        int hammingPriority = 0;
-        for (int i = 0; i < size; i++) {
-            for (int j = 0 ; j < size; j++) {
-                if ((i == size - 1)
-                   && (j == size - 1)) {
-                    break;
-                }
-
-                if (boardBlocks[i][j] != ((i * size) + (j + 1))) {
-					hammingPriority++;
-				}
-			}
-		}
         return hammingPriority;
     }
 
     public int manhattan() {
         // sum of Manhattan distances between blocks and goal
-        int manhattanPriority = 0;
-        int refValueRow, refValueCol;
-        int boardValue;
-
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                boardValue = boardBlocks[i][j];
-                //if (boardValue !=
-                 //       (i * size) + j + 1) {
-                if (boardValue != 0) {
-                    //System.out.println(boardValue + " " + ((i * size) + j + 1));
-                    refValueRow = (int) Math.ceil((double) boardValue / (double)size) - 1;
-                    refValueRow = refValueRow < 0 ? 0 : refValueRow;
-                    refValueCol = (boardValue - 1 - (refValueRow * size));
-                    refValueCol = (refValueCol < 0) ? 0 : refValueCol;
-                    //System.out.println(refValueRow + " " + refValueCol);
-                    manhattanPriority += Math.abs(refValueRow - i)
-                                        + Math.abs(refValueCol - j);
-                    //System.out.println("P" + manhattanPriority);
-                    //System.out.println();
-                }
-            }
-        }
         return manhattanPriority;
     }
 
@@ -96,13 +87,13 @@ public class Board
 
     public Board twin() {
         // a board obtained by exchanging two adjacent blocks in the same row
-		int [][]twinBlocks = new int[size][size];
-		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
+		int [][]twinBlocks = new int[rowSize][colSize];
+		for (int i = 0; i < rowSize; i++) {
+			for (int j = 0; j < colSize; j++) {
 				twinBlocks[i][j] = boardBlocks[i][j];
 			}
 		}
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < rowSize; i++) {
 			if (i != refBlockRow) {
 				twinBlocks[i][0] = boardBlocks[i][1];
 				twinBlocks[i][1] = boardBlocks[i][0];
@@ -120,8 +111,8 @@ public class Board
 
 		//return deepEquals(this.boardBlocks, comparedObject.boardBlocks);
 		boolean isEquals = true;
-		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
+		for (int i = 0; i < rowSize; i++) {
+			for (int j = 0; j < colSize; j++) {
 				if (comparedObject.boardBlocks[i][j]
 					   	!= this.boardBlocks[i][j]) {
 					isEquals = false;
@@ -133,13 +124,13 @@ public class Board
 	
     public Iterable<Board> neighbors() {
         // all neighboring boards
-        int [][]neighborBlocks = new int[size][size];
+        int [][]neighborBlocks = new int[rowSize][colSize];
         /* Create Neighbors and store it in the STACK */
         if (refBlockRow > 0) {
             //Up neighbor exists
             //System.out.println("Up neighbor exist");
-            for (int i = 0; i < size; i++) {
-                for (int j = 0; j < size; j++) {
+            for (int i = 0; i < rowSize; i++) {
+                for (int j = 0; j < colSize; j++) {
                     if ((refBlockRow == i) &&
                             (refBlockCol == j)) {
                         neighborBlocks[i][j] = boardBlocks[i - 1][j];
@@ -156,11 +147,11 @@ public class Board
         }
 
         //if ((initBST.get(0) + size) < size * size) {
-        if (refBlockRow < (size - 1)) {
+        if (refBlockRow < (rowSize - 1)) {
             //bottom neighbor exist
             //System.out.println("Bottom neighbor exist");
-            for (int i = 0; i < size; i++) {
-                for (int j = 0; j < size; j++) {
+            for (int i = 0; i < rowSize; i++) {
+                for (int j = 0; j < colSize; j++) {
                     if ((refBlockRow == i) &&
                             (refBlockCol == j)) {
                         neighborBlocks[i][j] = boardBlocks[i + 1][j];
@@ -182,8 +173,8 @@ public class Board
         if (refBlockCol == 0) {
             //Only right neighbor exist
             //System.out.println("Right neighbor exist");
-            for (int i = 0; i < size; i++) {
-                for (int j = 0; j < size; j++) {
+            for (int i = 0; i < rowSize; i++) {
+                for (int j = 0; j < colSize; j++) {
                     if ((refBlockRow == i)
                         && (refBlockCol == j)) {
                         neighborBlocks[i][j] = boardBlocks[i][j + 1];
@@ -199,11 +190,11 @@ public class Board
 			//System.out.println(rightBoard.toString());
             neighborStack.push(rightBoard);
         //} else if (initBST.get(0) % (size - 1) == 0) {
-        } else if (refBlockCol == (size - 1)) {
+        } else if (refBlockCol == (colSize - 1)) {
             //Only left neighbor exist
             //System.out.println("Left neighbor exist");
-            for (int i = 0; i < size; i++) {
-                for (int j = 0; j < size; j++) {
+            for (int i = 0; i < rowSize; i++) {
+                for (int j = 0; j < colSize; j++) {
                     if ((refBlockRow == i)
                         && (refBlockCol == j)) {
                         neighborBlocks[i][j] = boardBlocks[i][j - 1];
@@ -221,8 +212,8 @@ public class Board
         } else {
             //Both right and left neighbor exist
             //System.out.println("Both right and left neighbor exist");
-            for (int i = 0; i < size; i++) {
-                for (int j = 0; j < size; j++) {
+            for (int i = 0; i < rowSize; i++) {
+                for (int j = 0; j < colSize; j++) {
                     if ((refBlockRow == i)
                         && (refBlockCol == j)) {
                         neighborBlocks[i][j] = boardBlocks[i][j + 1];
@@ -238,8 +229,8 @@ public class Board
 			//System.out.println(rightBoard.toString());
             neighborStack.push(rightBoard);
 
-            for (int i = 0; i < size; i++) {
-                for (int j = 0; j < size; j++) {
+            for (int i = 0; i < rowSize; i++) {
+                for (int j = 0; j < colSize; j++) {
                     if ((refBlockRow == i)
                         && (refBlockCol == j)) {
                         neighborBlocks[i][j] = boardBlocks[i][j - 1];
@@ -261,10 +252,10 @@ public class Board
     public String toString() {
         // string representation of the board (in the output format specified below)
         StringBuilder s = new StringBuilder();
-        s.append(size + "\n");
+        s.append(dimension() + "\n");
 
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
+        for (int i = 0; i < rowSize; i++) {
+            for (int j = 0; j < colSize; j++) {
                 //System.out.println(boardBlocks[i][j]);
                 s.append(String.format("%2d ", boardBlocks[i][j]));
             }
@@ -282,14 +273,16 @@ public class Board
             for (int j = 0; j < N; j++)
                 blocks[i][j] = in.readInt();
         Board initial = new Board(blocks);
-        //System.out.println(initial.toString());
-        //System.out.println(initial.hamming());
+        System.out.println(initial.toString());
+        System.out.println(initial.hamming());
+        System.out.println(initial.manhattan());
         //System.out.println(initial.isGoal());
         for (Board neighborBoard : initial.neighbors()) {
             if (neighborBoard != null) {
                 //System.out.println(initial.equals(neighborBoard));
-				//System.out.println(neighborBoard.toString());
-                //System.out.println(neighborBoard.hamming());
+				System.out.println(neighborBoard.toString());
+                System.out.println(neighborBoard.hamming());
+				System.out.println(neighborBoard.manhattan());
             } else {
                 break;
             }
