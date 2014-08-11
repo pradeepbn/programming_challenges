@@ -246,7 +246,11 @@ public class Board
 			//System.out.println(leftBoard.toString());
             neighborStack.push(leftBoard);
         }
-        return neighborStack;
+        
+        ResizingArrayStack<Board> returnStack = neighborStack;
+        neighborStack = null;
+        neighborStack = new ResizingArrayStack<Board>();
+        return returnStack;
     }
 
     public String toString() {
