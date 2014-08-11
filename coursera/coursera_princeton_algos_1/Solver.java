@@ -36,9 +36,9 @@ public class Solver {
 
         private class TreeSet implements Comparable<TreeSet> {
             public Board b;
-			private int hammingPriority;
+			public int hammingPriority;
 			public int manhattanPriority;
-			private int priority;
+			public int priority;
             public int moves;
             public TreeSet(Board board, int moves) {
                 this.moves = moves;
@@ -53,39 +53,29 @@ public class Solver {
                 //                + " " + this.manhattanPriority
                 //                + " " + this.b.manhattan()
                 //                + " " + that.manhattanPriority );
-                //System.out.println(this.b.toString());
-                //System.out.println(that.b.toString());
-                //System.out.println("--------------------");
-                if (this.b.equals(that.b) == true) {
-                    //System.out.println("0");
+                if (this.b.equals(that.b)) {
                     return 0;
                 }
-                //if (this.manhattanPriority < that.manhattanPriority) {
-                if (this.b.manhattan() < that.b.manhattan()) {
-                    //System.out.println("<");
+                if (this.moves < that.moves) {
                     return -1;
-                //} else if (this.manhattanPriority > that.manhattanPriority) {
-                } else if (this.b.manhattan() > that.b.manhattan()) {
-                    //System.out.println("<");
+                } else if (this.moves > that.moves) {
                     return 1;
                 } else {
-                    //if (this.b.manhattan() < that.b.manhattan()) {
-                    //    return -1;
-                    //} else if (this.b.manhattan() > that.b.manhattan()) {
-                    //    return 1;
-                    //} else {
-                    //    //System.out.println("0");
-                    //    return 0;
-                    //}
-                    return -1;
+                    return 0;
                 }
             }
 
-            public boolean equals(Object y) {
+            /*public boolean equals(Object y) {
+                boolean isEquals = false;
                 if ( !(y instanceof TreeSet) ) return false;
                 TreeSet comparedObject = (TreeSet) y;
-                return this.b.equals(comparedObject.b);
-            }
+
+                if (this.moves == comparedObject.moves) {
+                    isEquals = true;
+                }
+
+                return isEquals; 
+            }*/
         }
 
         public BoardSolver(Board board) {
@@ -100,7 +90,7 @@ public class Solver {
             //System.out.println("Priority:" + priority);
             //System.out.println(board.toString());
 			//minPrioritySet = prevBoard[0];
-            //setPQ.add(prevBoard[0]);
+            setPQ.add(prevBoard[0]);
             neighborArbiter.insert(prevBoard[0]);
             //neighborArbiter.insert(priority);
         }
@@ -118,19 +108,25 @@ public class Solver {
             //    }
             //}
             minPrioritySet = neighborArbiter.delMin();
+            moves = minPrioritySet.moves;
+
+            if (setPQ.contains(minPrioritySet) && prevBoard[1] != null) {
+                setPQ.delete(prevBoard[1]);
+                setPQ.delete(minPrioritySet);
+            }
+            setPQ.add(minPrioritySet);
 
             searchBoard = minPrioritySet.b;
-            moves = minPrioritySet.moves;
             goal = searchBoard.isGoal();
             if (goal == true) {
                 finalMovesCount = moves;
             }
-            searchBoardStack.push(searchBoard);
-            //System.out.println("Seach Board Priority "
-            //                    + minPrioritySet.manhattanPriority
-            //                    + " Moves " + moves);
-            //System.out.println(searchBoard.toString());
-            //System.out.println("Neighbors");
+            //searchBoardStack.push(searchBoard);
+            System.out.println("Seach Board Priority "
+                                + minPrioritySet.manhattanPriority
+                                + " Moves " + moves);
+            System.out.println(searchBoard.toString());
+            System.out.println("Neighbors");
             prevBoard[1] = minPrioritySet;
             moves++;
             for (Board neighborBoard : searchBoard.neighbors()) {
@@ -140,9 +136,9 @@ public class Solver {
                 if (neighborBoard != null) {
                     neighborArbiter.insert(new TreeSet(neighborBoard, moves));
                     priority = neighborBoard.manhattan() + moves;
-                    //System.out.println("Priority:" + neighborBoard.manhattan()
-                    //                    + " Moves:" + moves);
-                    //System.out.println(neighborBoard.toString());
+                    System.out.println("Priority:" + neighborBoard.manhattan()
+                                        + " Moves:" + moves);
+                    System.out.println(neighborBoard.toString());
                 } else {
                     break;
                 }
@@ -152,6 +148,12 @@ public class Solver {
         }
 
         public Iterable<Board> solution() {
+            //MinPQ<Board> stackElements = new MinPQ<Board>(PRIORITY_ORDER);
+            for (TreeSet setElement : setPQ) {
+                System.out.println(setElement.moves);
+                System.out.println(setElement.b.toString());
+                searchBoardStack.push(setElement.b);
+            }
             return searchBoardStack;
         }
     }
@@ -228,8 +230,9 @@ public class Solver {
             StdOut.println("No solution possible");
         else {
             StdOut.println("Minimum number of moves = " + solver.moves());
-            for (Board board : solver.solution())
-                StdOut.println(board.toString());
+            solver.solution();
+            //for (Board board : solver.solution())
+                //StdOut.println(board.toString());
         }
     }
 }
