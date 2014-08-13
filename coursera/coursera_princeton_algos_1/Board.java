@@ -9,6 +9,7 @@ public class Board
     final private char [][]boardBlocks;
     final private char rowSize;
     final private char colSize;
+	//private Board parent;
 	private char hammingPriority;
 	private char manhattanPriority;
 
@@ -57,6 +58,7 @@ public class Board
 				}
             }
         }
+		//parent = null;
     }
 
     public int dimension() {
@@ -149,6 +151,7 @@ public class Board
                 }
             }
             Board upBoard = new Board(neighborBlocks);
+			//upBoard.parent = this;
 			//System.out.println(upBoard.toString());
             neighborStack.push(upBoard);
         }
@@ -172,6 +175,7 @@ public class Board
                 }
             }
             Board bottomBoard = new Board(neighborBlocks);
+			//bottomBoard.parent = this;
 			//System.out.println(bottomBoard.toString());
             neighborStack.push(bottomBoard);
         }
@@ -194,6 +198,7 @@ public class Board
                 }
             }
             Board rightBoard = new Board(neighborBlocks);
+			//rightBoard.parent = this;
 			//System.out.println(rightBoard.toString());
             neighborStack.push(rightBoard);
         //} else if (initBST.get(0) % (size - 1) == 0) {
@@ -214,6 +219,7 @@ public class Board
                 }
             }
             Board leftBoard = new Board(neighborBlocks);
+			//leftBoard.parent = this;
 			//System.out.println(leftBoard.toString());
             neighborStack.push(leftBoard);
         } else {
@@ -234,6 +240,7 @@ public class Board
             }
             Board rightBoard = new Board(neighborBlocks);
 			//System.out.println(rightBoard.toString());
+			//rightBoard.parent = this;
             neighborStack.push(rightBoard);
 
             for (char i = 0; i < rowSize; i++) {
@@ -250,6 +257,7 @@ public class Board
                 }
             }
             Board leftBoard = new Board(neighborBlocks);
+			//leftBoard.parent = this;
 			//System.out.println(leftBoard.toString());
             neighborStack.push(leftBoard);
         }
