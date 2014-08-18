@@ -2,6 +2,8 @@ import java.util.Iterator;
 
 public class PointSET {
 	private SET<Point2D> pointSet;
+	private ResizingArrayStack<Point2D> pointStack =
+				new ResizingArrayStack<Point2D>();
 	public PointSET() {
 	  // construct an empty set of points
 		pointSet = new SET<Point2D>();
@@ -34,9 +36,27 @@ public class PointSET {
 			StdDraw.point(p.x(), p.y());
 		}
 	}
-	//public Iterable<Point2D> range(RectHV rect) {
-	//// all points in the set that are inside the rectangle
-	//}
+	public Iterable<Point2D> range(RectHV rect) {
+	// all points in the set that are inside the rectangle
+        double xmin = rect.xmin();
+        double xmax = rect.xmax();
+        double ymin = rect.ymin();
+        double ymax = rect.ymax();
+        Point2D pmax = new Point2D(xmax, ymax);
+        Point2D pmin = new Point2D(xmin, ymin);
+		Iterator<Point2D> iter = pointSet.iterator();
+        Point2D p;
+
+        while (iter.hasNext()) {
+            p = iter.next();
+            if (p.compareTo(pmax) <= 0
+                && p.compareTo(pmin) >= 0) {
+                pointStack.push(p);
+            }
+        }
+
+        return pointStack;
+	}
 	//public Point2D nearest(Point2D p) {
 	//// a nearest neighbor in the set to p; null if set is empty
 	//}
