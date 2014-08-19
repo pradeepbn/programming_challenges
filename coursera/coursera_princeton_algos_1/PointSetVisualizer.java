@@ -7,6 +7,7 @@ public class PointSetVisualizer {
         //StdDraw.setYscale();
 		Point2D p;
         RectHV rect = new RectHV(0, 0, 0.5, 0.5);
+		Point2D queryPoint = new Point2D(1, 1);
         while (!in.isEmpty()) {
             p = new Point2D(in.readDouble(), in.readDouble());
 			pSet.insert(p);
@@ -18,5 +19,13 @@ public class PointSetVisualizer {
         for (Point2D point : pSet.range(rect)) {
             System.out.println(point.x() + " " + point.y());
         }
+
+		p = pSet.nearest(queryPoint);
+
+		if (p != null) {
+			System.out.println("Nearest Point to (0.5,0.5):" + "(" + p.x() + "," + p.y() + ")");
+		} else {
+			System.out.println("No search point found");
+		}
     }
 }

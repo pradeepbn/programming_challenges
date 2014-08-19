@@ -38,27 +38,37 @@ public class PointSET {
 	}
 	public Iterable<Point2D> range(RectHV rect) {
 	// all points in the set that are inside the rectangle
-        double xmin = rect.xmin();
-        double xmax = rect.xmax();
-        double ymin = rect.ymin();
-        double ymax = rect.ymax();
-        Point2D pmax = new Point2D(xmax, ymax);
-        Point2D pmin = new Point2D(xmin, ymin);
 		Iterator<Point2D> iter = pointSet.iterator();
         Point2D p;
 
         while (iter.hasNext()) {
             p = iter.next();
-            if (p.compareTo(pmax) <= 0
-                && p.compareTo(pmin) >= 0) {
+            if (rect.contains(p)) {
                 pointStack.push(p);
             }
         }
 
         return pointStack;
 	}
-	//public Point2D nearest(Point2D p) {
-	//// a nearest neighbor in the set to p; null if set is empty
-	//}
+	public Point2D nearest(Point2D p) {
+	// a nearest neighbor in the set to p; null if set is empty
+		Iterator<Point2D> iter = pointSet.iterator();
+        Point2D searchPoint;
+		Point2D minPoint = null;
+		double minDistance = 0;
+		double queryDistance;
+
+        while (iter.hasNext()) {
+            searchPoint = iter.next();
+			queryDistance = searchPoint.distanceSquaredTo(p);
+			if ((minDistance == 0)
+				|| (minDistance > queryDistance)) { 
+				minDistance = queryDistance;
+				minPoint = searchPoint;
+			}
+        }
+
+        return minPoint;
+	}
 }
 
