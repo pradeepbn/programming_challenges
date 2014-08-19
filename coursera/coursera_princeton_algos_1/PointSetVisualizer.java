@@ -6,7 +6,7 @@ public class PointSetVisualizer {
         //StdDraw.setXscale();
         //StdDraw.setYscale();
 		Point2D p;
-        RectHV rect = new RectHV(0, 0, 1, 1);
+        RectHV rect = new RectHV(0, 0, 0.5, 0.5);
         while (!in.isEmpty()) {
             p = new Point2D(in.readDouble(), in.readDouble());
 			pSet.insert(p);
@@ -14,9 +14,9 @@ public class PointSetVisualizer {
 		//StdDraw.clear();
         //StdDraw.setPenColor(StdDraw.BLACK);
 		//pSet.draw();
-		StdDraw.show(50);
-        for (Point2D p : pSet.range()) {
-            System.out.println(p.x() + " " + p.y());
+		//StdDraw.show(50);
+        for (Point2D point : pSet.range(rect)) {
+            System.out.println(point.x() + " " + point.y());
         }
     }
 }
