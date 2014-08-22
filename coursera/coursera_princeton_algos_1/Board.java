@@ -9,8 +9,10 @@ public class Board
     final private char [][]boardBlocks;
     final private char rowSize;
     final private char colSize;
-    private char hammingPriority;
-    private char manhattanPriority;
+	//private Board parent;
+	private char hammingPriority;
+	private char manhattanPriority;
+
     public Board(int[][] blocks) {
         // construct a board from an N-by-N array of blocks
         // (where blocks[i][j] = block in row i, column j)
@@ -56,6 +58,7 @@ public class Board
                 }
             }
         }
+		//parent = null;
     }
 
     public int dimension() {
@@ -148,7 +151,8 @@ public class Board
                 }
             }
             Board upBoard = new Board(neighborBlocks);
-            //System.out.println(upBoard.toString());
+			//upBoard.parent = this;
+			//System.out.println(upBoard.toString());
             neighborStack.push(upBoard);
         }
 
@@ -171,7 +175,8 @@ public class Board
                 }
             }
             Board bottomBoard = new Board(neighborBlocks);
-            //System.out.println(bottomBoard.toString());
+			//bottomBoard.parent = this;
+			//System.out.println(bottomBoard.toString());
             neighborStack.push(bottomBoard);
         }
 
@@ -193,7 +198,8 @@ public class Board
                 }
             }
             Board rightBoard = new Board(neighborBlocks);
-            //System.out.println(rightBoard.toString());
+			//rightBoard.parent = this;
+			//System.out.println(rightBoard.toString());
             neighborStack.push(rightBoard);
         //} else if (initBST.get(0) % (size - 1) == 0) {
         } else if (refBlockCol == (colSize - 1)) {
@@ -213,7 +219,8 @@ public class Board
                 }
             }
             Board leftBoard = new Board(neighborBlocks);
-            //System.out.println(leftBoard.toString());
+			//leftBoard.parent = this;
+			//System.out.println(leftBoard.toString());
             neighborStack.push(leftBoard);
         } else {
             //Both right and left neighbor exist
@@ -232,7 +239,8 @@ public class Board
                 }
             }
             Board rightBoard = new Board(neighborBlocks);
-            //System.out.println(rightBoard.toString());
+			//System.out.println(rightBoard.toString());
+			//rightBoard.parent = this;
             neighborStack.push(rightBoard);
 
             for (char i = 0; i < rowSize; i++) {
@@ -249,7 +257,8 @@ public class Board
                 }
             }
             Board leftBoard = new Board(neighborBlocks);
-            //System.out.println(leftBoard.toString());
+			//leftBoard.parent = this;
+			//System.out.println(leftBoard.toString());
             neighborStack.push(leftBoard);
         }
         
