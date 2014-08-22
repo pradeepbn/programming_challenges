@@ -1,15 +1,16 @@
 import java.util.Comparator;
+import java.util.Iterator;
 
 public class Solver {
-    private int finalMovesCount;
     private int moves;
-    private int twinMoves;
     private boolean goal = false;
     private boolean twinGoal = false;
     private BoardSolver initialBoardSolver;
     private BoardSolver twinBoardSolver;
 
     private class BoardSolver {
+        private int count;
+        public int finalMovesCount;
         private final Comparator<TreeSet> PRIORITY_ORDER = new PriorityOrder();
         private class PriorityOrder implements Comparator<TreeSet> {
             public int compare(TreeSet p, TreeSet q) {
@@ -18,16 +19,20 @@ public class Solver {
                 } else if (p.manhattanPriority > q.manhattanPriority) {
                     return 1;
                 } else {
-                    return 0;
+                    if (p.b.manhattan() < q.b.manhattan()) {
+                        return -1;
+                    } else if (p.b.manhattan() > q.b.manhattan()) {
+                        return 1;
+                    } else {
+                        return 0;
+                    }
                 }
             }
         }
-        private BinarySearchST<Integer, Board> gameTree =
-                                   new BinarySearchST<Integer, Board>();
+        //private BinarySearchST<Integer, Board> gameTree =
+        //                           new BinarySearchST<Integer, Board>();
         private MinPQ<TreeSet> neighborArbiter = new MinPQ<TreeSet>(PRIORITY_ORDER);
         private SET<TreeSet> setPQ = new SET<TreeSet>();
-        private ResizingArrayStack<Board> searchBoardStack =
-                            new ResizingArrayStack<Board>();
         private TreeSet []prevBoard = new TreeSet[2];
         //private Board []prevBoard = new Board[2];
         private Board searchBoard;
@@ -36,16 +41,16 @@ public class Solver {
 
         private class TreeSet implements Comparable<TreeSet> {
             public Board b;
-            public int hammingPriority;
+            //public int hammingPriority;
             public int manhattanPriority;
-            public int priority;
+            //public int priority;
             public int moves;
             public TreeSet(Board board, int moves) {
                 this.moves = moves;
                 b = board;
-                this.hammingPriority = b.hamming() + moves;
+                //this.hammingPriority = b.hamming() + moves;
                 this.manhattanPriority = b.manhattan() + moves;
-                this.priority = this.manhattanPriority;
+                //this.priority = this.manhattanPriority;
             }
 
             public int compareTo(TreeSet that) {
@@ -56,6 +61,13 @@ public class Solver {
                 if (this.b.equals(that.b)) {
                     return 0;
                 }
+                //if (this.b.manhattan() < that.b.manhattan()) {
+                //    return -1;
+                //} else if (this.b.manhattan() > that.b.manhattan()) {
+                //    return 1;
+                //} else {
+                //    return -1;
+                //}
                 if (this.moves < that.moves) {
                     return -1;
                 } else if (this.moves > that.moves) {
@@ -79,27 +91,28 @@ public class Solver {
         }
 
         public BoardSolver(Board board) {
-            int priority;
+            //int priority;
             //[]prevBoard = new TreeSet[2];
-        
+
+            count = 1;
             prevBoard[0] = new TreeSet(board, moves);
             //prevBoard[0].moves = moves;
             //prevBoard[0] = board;
-            priority = prevBoard[0].b.manhattan() + moves;
-            gameTree.put(priority, board);
+            //priority = prevBoard[0].b.manhattan() + moves;
+            //gameTree.put(priority, board);
             //System.out.println("Priority:" + priority);
             //System.out.println(board.toString());
             //minPrioritySet = prevBoard[0];
-            setPQ.add(prevBoard[0]);
+            //setPQ.add(prevBoard[0]);
             neighborArbiter.insert(prevBoard[0]);
             //neighborArbiter.insert(priority);
         }
 
         public boolean isGoal() {
-            int priority;
+            //int priority;
             Board minPriorityBoard;
-            int minPriority;
-            boolean isValidMove = false;
+            TreeSet prioritySet;
+            //int minPriority;
 
             //while (true) {
             //    minPrioritySet = neighborArbiter.delMin();
@@ -108,32 +121,31 @@ public class Solver {
             //        break;
             //    }
             //}
+            //minPrioritySet = setPQ.min();
+            //setPQ.delete(minPrioritySet);
+            //if (!neighborArbiter.isEmpty()) {
             minPrioritySet = neighborArbiter.delMin();
+            //}
+            //minPrioritySet = neighborArbiter.min();
+            //neighborArbiter.insert(minPrioritySet);
             moves = minPrioritySet.moves;
 
-            /*
-             * Do not add into the SET if the arbiter does not pick up
-             * the neighbor of the previous search node
-             */
-
-            for (Board neighborBoard : prevBoard[0].b.neighbors()) {
-                if (minPrioritySet.b.equals(neighborBoard)) {
-                    isValidMove = true;
-                }
-            }
-            if (isValidMove) {
-                if (setPQ.contains(minPrioritySet) && prevBoard[1] != null) {
-                    setPQ.delete(prevBoard[1]);
-                    setPQ.delete(minPrioritySet);
-                }
-                setPQ.add(minPrioritySet);
-            }
+            //setPQ.delete(minPrioritySet);
+            //if (setPQ.contains(minPrioritySet) && prevBoard[1] != null) {
+            //    setPQ.delete(prevBoard[1]);
+                //setPQ.delete(minPrioritySet);
+            //}
 
             searchBoard = minPrioritySet.b;
             goal = searchBoard.isGoal();
             if (goal == true) {
                 finalMovesCount = moves;
             }
+
+            //if (setPQ.contains(minPrioritySet)) {
+            //    return goal;
+            //}
+            //setPQ.add(minPrioritySet);
             //searchBoardStack.push(searchBoard);
             //System.out.println("Seach Board Priority "
             //                    + minPrioritySet.manhattanPriority
@@ -146,15 +158,21 @@ public class Solver {
                 if (prevBoard[0].b.equals(neighborBoard) == true) {
                     continue;
                 }
-                if (neighborBoard != null) {
-                    neighborArbiter.insert(new TreeSet(neighborBoard, moves));
-                    priority = neighborBoard.manhattan() + moves;
-                    //System.out.println("Priority:" + neighborBoard.manhattan()
-                    //                    + " Moves:" + moves);
-                    //System.out.println(neighborBoard.toString());
-                } else {
-                    break;
-                }
+                prioritySet = new TreeSet(neighborBoard, moves);
+
+                ////System.out.println("P");
+                //if (setPQ.contains(prioritySet)) {
+                //    prioritySet = neighborArbiter
+                //    continue;
+                //} else {
+                //    setPQ.add(prioritySet);
+                    neighborArbiter.insert(prioritySet);
+                //}
+                //setPQ.add(new TreeSet(neighborBoard, moves));
+                //priority = neighborBoard.manhattan() + moves;
+                //System.out.println("Priority:" + neighborBoard.manhattan()
+                //                    + " Moves:" + moves);
+                //System.out.println(neighborBoard.toString());
             }
             prevBoard[0] = prevBoard[1];
             return goal;
@@ -162,20 +180,44 @@ public class Solver {
 
         public Iterable<Board> solution() {
             //MinPQ<Board> stackElements = new MinPQ<Board>(PRIORITY_ORDER);
+             ResizingArrayQueue<Board> searchBoardQueue =
+                                new ResizingArrayQueue<Board>();
             for (TreeSet setElement : setPQ) {
-                System.out.println(setElement.moves);
-                System.out.println(setElement.b.toString());
-                searchBoardStack.push(setElement.b);
+            //Iterator<TreeSet> Iter = neighborArbiter.iterator();
+            //TreeSet setElement;
+            //while (Iter.hasNext()) {
+            //    setElement = Iter.next();
+                //System.out.println(setElement.manhattanPriority);
+                //System.out.println(setElement.moves);
+                //System.out.println(setElement.b.toString());
+                searchBoardQueue.enqueue(setElement.b);
+                //searchBoardStack.push(setElement.b);
             }
-            return searchBoardStack;
+            return searchBoardQueue;
+            //return neighborArbiter.iterator();
+        }
+
+        public void printNeigbhorArbiter() {
+            Iterator iter = neighborArbiter.iterator();
+            TreeSet set;
+            System.out.println("Step " + count);
+            while(iter.hasNext()) {
+                set = (TreeSet)iter.next();
+                System.out.println("Priority " + set.manhattanPriority);
+                System.out.println("Moves " + set.moves);
+                System.out.println("Manhattan " + set.b.manhattan());
+                System.out.println();
+
+            }
+            System.out.println("-------------");
+            count++;
         }
     }
 
     public Solver(Board initial) {
         // find a solution to the initial board (using the A* algorithm)
-        Board twinBoard = initial.twin();
         moves = 0;
-        twinMoves = 0;
+        Board twinBoard = initial.twin();
         goal = false;
         twinGoal = false;
         initialBoardSolver = new BoardSolver(initial);
@@ -187,6 +229,7 @@ public class Solver {
             if (goal == true) {
                 break;
             }
+            //initialBoardSolver.printNeigbhorArbiter();
             twinGoal = twinBoardSolver.isGoal();
             if (twinGoal == true) {
                 break;
@@ -207,9 +250,10 @@ public class Solver {
     public int moves() {
         // min number of moves to solve initial board; -1 if no solution
         if (goal == true) {
-            return finalMovesCount;
+            return initialBoardSolver.finalMovesCount;
         } else if (twinGoal == true) {
-            return twinMoves;
+            return -1;
+            //return twinBoardSolver.finalMovesCount;
         }
             return 0;
     }
@@ -218,7 +262,8 @@ public class Solver {
         if (goal == true) {
             return initialBoardSolver.solution();
         } else if (twinGoal == true) {
-            return twinBoardSolver.solution();
+            return null;
+            //return twinBoardSolver.solution();
         }
         return null;
     }
@@ -245,7 +290,7 @@ public class Solver {
             StdOut.println("Minimum number of moves = " + solver.moves());
             solver.solution();
             //for (Board board : solver.solution())
-                //StdOut.println(board.toString());
+            //    StdOut.println(board.toString());
         }
     }
 }
