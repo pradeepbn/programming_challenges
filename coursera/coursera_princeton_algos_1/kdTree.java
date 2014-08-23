@@ -2,8 +2,8 @@ import java.util.Comparator;
 
 public class kdTree {
     private int size;
-    private Comparator cmpY;
-    private Comparator cmpX;
+    private Comparator<Point2D> cmpY;
+    private Comparator<Point2D> cmpX;
     private double xmax = 1;
     private double ymax = 1;
     private double xmin = 0;
@@ -14,8 +14,9 @@ public class kdTree {
        private RectHV rect;    // the axis-aligned rectangle corresponding to this node
        private Node lb;        // the left/bottom subtree
        private Node rt;        // the right/top subtree
+	   private char orientation;
 
-       public Node(point2D point) {
+       public Node(Point2D point) {
            p = point;
            rect = null;
            lb = null;
@@ -35,6 +36,7 @@ public class kdTree {
        if (kdNode == null) {
            return true;
        }
+	   return false;
     }
     public int size() {
         // number of points in the set
@@ -43,110 +45,141 @@ public class kdTree {
     public void insert(Point2D p) {
         // add the point p to the set (if it is not already in the set)
         // 1 - vertical orientation; 0 - horizontal orientation
-        rectHV rect = null;
-        kdNode = insert(kdNode, p, 0, rect);
+        //RectHV rect = null;
+		
+		//System.out.println("Point-" + p.x() + "," + p.y());
+        kdNode = insert(kdNode, p, 1, null, 0);
     }
     /*
      * Orientation refers to the parent orientation
      * Every child should reverse orientation passed by the parent
      */
-    private Node insert(Node node, point2D point, int orientation, RectHV rect, int cmp) {
-        int cmp;
+    private Node insert(Node node, Point2D point, int orientation, 
+						Node parent, int cmp) {
 
-        if (orientation == 0) { orientation = 1; }
-        else if (orientation == 1) { orientation = 0; }
+        //if (orientation == 0) { orientation = 1; }
+        //else if (orientation == 1) { orientation = 0; }
 
         if (node == null) {
             node = new Node(point);
             size++;
             //create a rect using the orientation
-            if (rect == null) {
+			node.orientation = (char)orientation;
+            if (parent == null) {
                 node.rect = new RectHV(xmin, ymin, xmax, ymax);
                 return node;
             }
-            double xpmin = node.rect.xmin();
-            double ypmin = node.rect.ymin();
-            double xpmax = node.rect.xmax();
-            double ypmax = node.rect.ymax();
+            double xpmin = parent.rect.xmin();
+            double ypmin = parent.rect.ymin();
+            double xpmax = parent.rect.xmax();
+            double ypmax = parent.rect.ymax();
 
             if (orientation == 0) {
                 //create a vertical split rect
                 if (cmp == -1) {
-                    node.rect = new RectHV(xpmin, ypmin, point.x(), ypmax);
+					//System.out.println("Left");
+                    node.rect = new RectHV(xpmin, ypmin, parent.p.x(), ypmax);
                 } else if (cmp == 1) {
-                    node.rect = new RectHV(point.x(), ypmin, xpmax, ypmax);
+					//System.out.println("Right");
+                    node.rect = new RectHV(parent.p.x(), ypmin, xpmax, ypmax);
                 }
-            else if (orientation == 1) {
+			} else if (orientation == 1) {
                 //create a horizontal split rect
                 if (cmp == -1) {
-                    node.rect = new RectHV(xpmin, ypmin, xpmax, point.y());
+					//System.out.println("Down");
+                    node.rect = new RectHV(xpmin, ypmin, xpmax, parent.p.y());
                 } else if (cmp == 1) {
-                    node.rect = new RectHV(xpmin, point.y(), xpmax, ypmax);
+					//System.out.println("Up");
+                    node.rect = new RectHV(xpmin, parent.p.y(), xpmax, ypmax);
                 }
             }
+			//System.out.println("xmin:" + node.rect.xmin() +
+			//		" ymin:" + node.rect.ymin() + " xmax" + node.rect.xmax() +
+			//		" ymax:" + node.rect.ymax());
+		    //System.out.println("Ornt" + node.orientation);
+			//System.out.println("Point add-" + point.x() + "," + point.y());
             return node;
         }
 
         if (orientation == 0) {
             //check if the point lies on the up or down of the axis
-            cmpY = point.Y_ORDER;
-            cmp = cmpY.compare(point, node.p);
-        else if (orientation == 1) {
+            cmp = Point2D.Y_ORDER.compare(point, node.p);
+			cmp = (cmp == 0) ? 1 : cmp;
+			//System.out.println("Checking Up/ Down:" + cmp);
+		} else if (orientation == 1) {
             //check if the point lies on the right or left of the axis
-            cmpX = point.X_ORDER;
-            cmp = cmpX.compare(point, node.p);
+            //cmpX = point.X_ORDER;
+			//System.out.println("Nodex:" + node.p.x() + "Nodey:" + node.p.y());
+            cmp = Point2D.X_ORDER.compare(point, node.p);
+			cmp = (cmp == 0) ? 1 : cmp;
+			//System.out.println("Checking Right/ left:" + cmp);
         }
 
+		orientation = (orientation != 0) ? 0 : 1;
         if (cmp == -1) {
-           node.lb = insert(node.lb, point, orientation, node.rect, cmp);
+           node.lb = insert(node.lb, point, orientation, node, cmp);
         } else if (cmp == 1) {
-           node.rt = insert(node.rt, point, orientation, node.rect, cmp);
+			//System.out.println("Node:" + node);
+           node.rt = insert(node.rt, point, orientation, node, cmp);
         }
 
+		//System.out.println();
         return node;
     }
     public boolean contains(Point2D p) {
     // does the set contain the point p?
-        Node node = kdNode;
-        while (node != null) {
-            if (node.p.compare(p) == 0) {
-                return true;
-            } else if (node.p.compare(p) == -1) {
-                node = kdNode.lb;
-            } else if (node.p.compare(p) == 1) {
-                node = kdNode.rt;
-            }
-            return false;
-        }
+        //Node node = kdNode;
+        //while (node != null) {
+        //    if (node.p.compare(p) == 0) {
+        //        return true;
+        //    } else if (node.p.compare(p) == -1) {
+        //        node = kdNode.lb;
+        //    } else if (node.p.compare(p) == 1) {
+        //        node = kdNode.rt;
+        //    }
+        //    return false;
+        //}
+		return false;
     }
     public void draw() {
     // draw all of the points to standard draw
         int orientation = 0;
-        int count = 1;
-        int level = 1;
+        int count = 0;
+        //int level = 1;
+		StdDraw.setPenColor(StdDraw.BLACK);
+		kdNode.rect.draw();
         for (Node node : levelOrder()) {
-            if (count > level) {
-                level = level << 1;
-                orientation = orientation ? 0 : 1;
-            }
-            if (orientation == 0) {
+            //if (count > level) {
+            //    level = level << 1;
+            //    orientation = (orientation != 0) ? 0 : 1;
+            //}
+            if (node.orientation == 0) {
                 //draw blue
-                StdDraw.setPenColor(StdDraw.Blue);
-                node.rect.draw();
-                StdDraw.setPenColor(StdDraw.Black);
+				StdDraw.setPenRadius(.001);
+                StdDraw.setPenColor(StdDraw.BLUE);
+                //node.rect.draw();
+				StdDraw.line(node.rect.xmin(), node.p.y(), 
+							node.rect.xmax(), node.p.y());
+				StdDraw.setPenRadius(.01);
+                StdDraw.setPenColor(StdDraw.BLACK);
                 node.p.draw();
             } else {
                 //draw red
-                StdDraw.setPenColor(StdDraw.Red);
-                node.rect.draw();
-                StdDraw.setPenColor(StdDraw.Black);
+				StdDraw.setPenRadius(.001);
+                StdDraw.setPenColor(StdDraw.RED);
+				StdDraw.line(node.p.x(), node.rect.ymin(),
+							node.p.x(), node.rect.ymax());
+                //node.rect.draw();
+				StdDraw.setPenRadius(.01);
+                StdDraw.setPenColor(StdDraw.BLACK);
                 node.p.draw();
             }
             count++;
         }
+		//System.out.println("draw():" + count);
     }
 
-    private Iterable<Key> levelOrder() {
+    private Iterable<Node> levelOrder() {
         Queue<Node> keys = new Queue<Node>();
         Queue<Node> queue = new Queue<Node>();
         queue.enqueue(kdNode);
@@ -157,13 +190,16 @@ public class kdTree {
             queue.enqueue(x.lb);
             queue.enqueue(x.rt);
         }
+		//System.out.println("Keys size:" + keys.size());
         return keys;
     }
 
     public Iterable<Point2D> range(RectHV rect) {
     // all points in the set that are inside the rectangle
+		return null;
     }
     public Point2D nearest(Point2D p) {
     // a nearest neighbor in the set to p; null if set is empty
+		return null;
     }
 }
