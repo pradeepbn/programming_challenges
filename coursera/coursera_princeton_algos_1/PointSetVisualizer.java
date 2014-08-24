@@ -20,6 +20,13 @@ public class PointSetVisualizer {
 		//System.out.println("KdTree:" + ktree.size());
 		ktree.draw();
 		StdDraw.show(50);
+        //in = new In(args[0]);
+        //while (!in.isEmpty()) {
+		//	count++;
+        //    p = new Point2D(in.readDouble(), in.readDouble());
+		//	//pSet.insert(p);
+		//	//System.out.println(ktree.contains(p));
+        //}
 		////StdDraw.clear();
         ////StdDraw.setPenColor(StdDraw.BLACK);
 		////pSet.draw();

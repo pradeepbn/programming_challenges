@@ -1,6 +1,6 @@
 import java.util.Comparator;
 
-public class kdTree {
+public class KdTree {
     private int size;
     private Comparator<Point2D> cmpY;
     private Comparator<Point2D> cmpX;
@@ -48,6 +48,9 @@ public class kdTree {
         //RectHV rect = null;
 		
 		//System.out.println("Point-" + p.x() + "," + p.y());
+		if (contains(p)) {
+			return;
+		}
         kdNode = insert(kdNode, p, 1, null, 0);
     }
     /*
@@ -128,17 +131,32 @@ public class kdTree {
     }
     public boolean contains(Point2D p) {
     // does the set contain the point p?
-        //Node node = kdNode;
-        //while (node != null) {
-        //    if (node.p.compare(p) == 0) {
-        //        return true;
-        //    } else if (node.p.compare(p) == -1) {
-        //        node = kdNode.lb;
-        //    } else if (node.p.compare(p) == 1) {
-        //        node = kdNode.rt;
-        //    }
-        //    return false;
-        //}
+		int orientation = 0;
+		int cmp;
+		Node node = kdNode;
+        while (node != null) {
+			if (node.p.equals(p)) {
+				return true;
+			}
+			orientation = (orientation != 0) ? 0 : 1;
+			if (orientation == 1) {
+				cmp = Point2D.X_ORDER.compare(p, node.p);
+				if (cmp == -1) {
+					node = node.lb;
+				} else {
+					node = node.rt;
+				}
+				continue;
+			} else if (orientation == 0) {
+				cmp = Point2D.Y_ORDER.compare(p, node.p);
+				if (cmp == -1) {
+					node = node.lb;
+				} else {
+					node = node.rt;
+				}
+				continue;
+			}
+        }
 		return false;
     }
     public void draw() {
@@ -195,11 +213,109 @@ public class kdTree {
     }
 
     public Iterable<Point2D> range(RectHV rect) {
-    // all points in the set that are inside the rectangle
-		return null;
+		// all points in the set that are inside the rectangle
+		Queue<Node> queue = new Queue<Node>();
+		//Queue<Node> searchNodes = new Queue<Node>();
+		Queue<Point2D> rectPoints = new Queue<Point2D>();
+		queue.enqueue(kdNode);
+		while (!queue.isEmpty()) {
+			Node x = queue.dequeue();
+			if (x == null) continue;
+			if (x.rect.intersects(rect)) {
+				if (x.rect.contains(x.p)) {
+					rectPoints.enqueue(x.p);
+				}
+				queue.enqueue(x.lb);
+				queue.enqueue(x.rt);
+			} else {
+				if (x.orientation == 0) {
+					//Horizontal split
+					if (x.p.y() > rect.xmax()) {
+						//Enque left tree
+						queue.enqueue(x.lb);
+					} else {
+						queue.enqueue(x.rt);
+					}
+				} else {
+					//Horizontal split
+					if (x.p.x() > rect.xmax()) {
+						//Enque left tree
+						queue.enqueue(x.lb);
+					} else {
+						queue.enqueue(x.rt);
+					}
+				}
+			}
+		}
+		return rectPoints;
     }
     public Point2D nearest(Point2D p) {
-    // a nearest neighbor in the set to p; null if set is empty
-		return null;
+		// a nearest neighbor in the set to p; null if set is empty
+		Node node;
+		Point2D nearestPoint;
+		if (kdNode == null) {
+			throw new IndexOutOfBoundsException("Uninitialized KD tree");
+		}
+		Queue<Node> queue = new Queue<Node>();
+		queue.enqueue(kdNode);
+		nearestPoint = node.p;
+		while (!queue.isEmpty()) {
+			node = queue.dequeue();
+			if (node == null) continue;
+			if (node.orientation == 0) {
+				if (p.distanceSquaredTo(node.p)
+					< p.distanceSquaredTo(nearestPoint)) {
+					nearestPoint = node.p;	
+					queue.enqueue(node.lb);
+					queue.enqueue(node.rt);
+				} else {
+					double normalDy = p.y() - node.p.y();
+					if ((normalDy * normalDy) < p.distanceSquaredTo(nearestPoint)) {
+						queue.enqueue(node.lb);
+						queue.enqueue(node.rt);
+					} else {
+						if (Point2D.Y_ORDER.compare(p, node.p) == -1) {
+							queue.enqueue(node.lb);
+						} else {
+							queue.enqueue(node.rt);
+						}
+					}
+				}
+			} else {
+				if (p.distanceSquaredTo(node.p)
+					< p.distanceSquaredTo(nearestPoint)) {
+					nearestPoint = node.p;	
+					queue.enqueue(node.lb);
+					queue.enqueue(node.rt);
+				} else {
+					double normalDx = p.x() - node.p.x();
+					if ((normalDx * normalDx) < p.distanceSquaredTo(nearestPoint)) {
+						queue.enqueue(node.lb);
+						queue.enqueue(node.rt);
+					} else {
+						if (Point2D.X_ORDER.compare(p, node.p) == -1) {
+							queue.enqueue(node.lb);
+						} else {
+							queue.enqueue(node.rt);
+						}
+					}
+				}
+			}
+		}
+		return nearestPoint;
     }
+	//private Point2D nearestNode(Node node, Point2D point) {
+	//	int cmp;	
+	//	if (node == null) {
+	//		return;
+	//	}
+	//	if (node.orientation == 0) {
+	//			
+	//	} else if (node.orientation == 1) {
+	//		cmp = Point2D.X_ORDER.compare(point, node.p);	
+	//		if (cmp == -1) {
+	//		} else {
+	//		}
+	//	}
+	//}
 }

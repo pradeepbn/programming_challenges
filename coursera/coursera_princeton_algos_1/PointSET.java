@@ -2,8 +2,6 @@ import java.util.Iterator;
 
 public class PointSET {
 	private SET<Point2D> pointSet;
-	private ResizingArrayStack<Point2D> pointStack =
-				new ResizingArrayStack<Point2D>();
 	public PointSET() {
 	  // construct an empty set of points
 		pointSet = new SET<Point2D>();
@@ -40,7 +38,8 @@ public class PointSET {
 	// all points in the set that are inside the rectangle
 		Iterator<Point2D> iter = pointSet.iterator();
         Point2D p;
-
+		ResizingArrayStack<Point2D> pointStack =
+						new ResizingArrayStack<Point2D>();
         while (iter.hasNext()) {
             p = iter.next();
             if (rect.contains(p)) {
