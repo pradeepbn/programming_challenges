@@ -253,24 +253,26 @@ public class KdTree {
 		// a nearest neighbor in the set to p; null if set is empty
 		Node node;
 		Point2D nearestPoint;
+		double distanceSquaredToNearest;
 		if (kdNode == null) {
-			throw new IndexOutOfBoundsException("Uninitialized KD tree");
+			return null;
 		}
 		Queue<Node> queue = new Queue<Node>();
 		queue.enqueue(kdNode);
 		nearestPoint = kdNode.p;
 		while (!queue.isEmpty()) {
 			node = queue.dequeue();
+			distanceSquaredToNearest = p.distanceSquaredTo(nearestPoint);
 			if (node == null) continue;
 			if (node.orientation == 0) {
 				if (p.distanceSquaredTo(node.p)
-					< p.distanceSquaredTo(nearestPoint)) {
+					< distanceSquaredToNearest) {
 					nearestPoint = node.p;	
 					queue.enqueue(node.lb);
 					queue.enqueue(node.rt);
 				} else {
 					double normalDy = p.y() - node.p.y();
-					if ((normalDy * normalDy) < p.distanceSquaredTo(nearestPoint)) {
+					if ((normalDy * normalDy) < distanceSquaredToNearest) {
 						queue.enqueue(node.lb);
 						queue.enqueue(node.rt);
 					} else {
@@ -283,13 +285,13 @@ public class KdTree {
 				}
 			} else {
 				if (p.distanceSquaredTo(node.p)
-					< p.distanceSquaredTo(nearestPoint)) {
+					< distanceSquaredToNearest) {
 					nearestPoint = node.p;	
 					queue.enqueue(node.lb);
 					queue.enqueue(node.rt);
 				} else {
 					double normalDx = p.x() - node.p.x();
-					if ((normalDx * normalDx) < p.distanceSquaredTo(nearestPoint)) {
+					if ((normalDx * normalDx) < distanceSquaredToNearest) {
 						queue.enqueue(node.lb);
 						queue.enqueue(node.rt);
 					} else {

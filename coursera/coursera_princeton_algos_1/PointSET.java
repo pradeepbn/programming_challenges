@@ -50,17 +50,26 @@ public class PointSET {
 	}
 	public Point2D nearest(Point2D p) {
 	// a nearest neighbor in the set to p; null if set is empty
+		if (p == null) {
+			return null;
+		}
+		if (pointSet.isEmpty()) {
+			return null;
+		}
 		Iterator<Point2D> iter = pointSet.iterator();
         Point2D searchPoint;
 		Point2D minPoint = null;
 		double minDistance = 0;
 		double queryDistance;
+		if (iter.hasNext()) {
+			minPoint = iter.next();
+			minDistance = minPoint.distanceSquaredTo(p);
+		}
 
         while (iter.hasNext()) {
             searchPoint = iter.next();
 			queryDistance = searchPoint.distanceSquaredTo(p);
-			if ((minDistance == 0)
-				|| (minDistance > queryDistance)) { 
+			if (minDistance > queryDistance) { 
 				minDistance = queryDistance;
 				minPoint = searchPoint;
 			}
