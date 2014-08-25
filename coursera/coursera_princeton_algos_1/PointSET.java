@@ -8,8 +8,7 @@ public class PointSET {
 	}
 	public boolean isEmpty() {
 	   // is the set empty?
-		pointSet.isEmpty();
-		return false;
+		return pointSet.isEmpty();
 	}
 	public int size() {
 	// number of points in the set
