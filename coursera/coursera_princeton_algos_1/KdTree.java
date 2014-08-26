@@ -306,40 +306,40 @@ public class KdTree {
             int cmp = Point2D.X_ORDER.compare(p, node.p);
             double dx;
             if (cmp == -1) {
-              nearestNode = nearestSearch(node.lb, nearestNode, p);  
+                nearestNode = nearestSearch(node.lb, nearestNode, p);
               //if (searchPointY > node.rect.ymax()) {
               //    dx = p.distanceSquaredTo(new Point2D(node.p.x(), node.rect.ymax()));
               //} else if (searchPointY < node.rect.ymin()) {
               //    dx = p.distanceSquaredTo(new Point2D(node.p.x(), node.rect.ymin()));
               //} else {
               //    dx = searchPointX - node.p.x();
-			  //    dx *= dx;
+                 //    dx *= dx;
               //}
-				if (node.rt != null) {
-					if ((node.rt.rect.distanceSquaredTo(p)
-						 < nearestNode.p.distanceSquaredTo(p))
-						  || (nearestNode.p.equals(node.p))) {
-						 nearestNode = nearestSearch(node.rt, nearestNode, p);
-					}
-				}
+                if (node.rt != null) {
+                     if ((node.rt.rect.distanceSquaredTo(p)
+                           <nearestNode.p.distanceSquaredTo(p))) {
+                            //|| (nearestNode.p.equals(node.p))) {
+                           nearestNode = nearestSearch(node.rt, nearestNode, p);
+                     }
+                }
             } else {
-				nearestNode = nearestSearch(node.rt, nearestNode, p);  
+                    nearestNode = nearestSearch(node.rt, nearestNode, p);  
               //if (searchPointY > node.rect.ymax()) {
               //    dx = p.distanceSquaredTo(new Point2D(node.p.x(), node.rect.ymax()));
               //} else if (searchPointY < node.rect.ymin()) {
               //    dx = p.distanceSquaredTo(new Point2D(node.p.x(), node.rect.ymin()));
               //} else {
               //    dx = searchPointX - node.p.x();
-			  //    dx *= dx;
+                 //    dx *= dx;
               //}
-				if (node.lb != null) {
-					if ((node.lb.rect.distanceSquaredTo(p)
-						 < nearestNode.p.distanceSquaredTo(p))
-						  || (nearestNode.p.equals(node.p))) {
-						 nearestNode = nearestSearch(node.lb, nearestNode, p);
-					}
-				}
-			}
+                    if (node.lb != null) {
+                         if ((node.lb.rect.distanceSquaredTo(p)
+                               <nearestNode.p.distanceSquaredTo(p))) {
+                                //|| (nearestNode.p.equals(node.p))) {
+                               nearestNode = nearestSearch(node.lb, nearestNode, p);
+                         }
+                    }
+               }
         } else {
             int cmp = Point2D.Y_ORDER.compare(p, node.p);
             double dy;
@@ -351,15 +351,15 @@ public class KdTree {
               //    dy = p.distanceSquaredTo(new Point2D(node.p.y(), node.rect.xmin()));
               //} else {
               //    dy = searchPointY - node.p.y();
-			  //    dy *= dy;
+                 //    dy *= dy;
               //}
-				if (node.rt != null) {
-					if ((node.rt.rect.distanceSquaredTo(p)
-						 < nearestNode.p.distanceSquaredTo(p))
-						  || (nearestNode.p.equals(node.p))) {
-						 nearestNode = nearestSearch(node.rt, nearestNode, p);
-					}
-				}
+                    if (node.rt != null) {
+                         if ((node.rt.rect.distanceSquaredTo(p)
+                               <nearestNode.p.distanceSquaredTo(p))) {
+                                //|| (nearestNode.p.equals(node.p))) {
+                               nearestNode = nearestSearch(node.rt, nearestNode, p);
+                         }
+                    }
             } else {
               nearestNode = nearestSearch(node.rt, nearestNode, p);  
               //if (searchPointX > node.rect.xmax()) {
@@ -368,15 +368,15 @@ public class KdTree {
               //    dy = p.distanceSquaredTo(new Point2D(node.p.y(), node.rect.xmin()));
               //} else {
               //    dy = searchPointY - node.p.y();
-			  //    dy *= dy;
+                 //    dy *= dy;
               //}
-				if (node.lb != null) {
-					if ((node.lb.rect.distanceSquaredTo(p)
-						 < nearestNode.p.distanceSquaredTo(p))
-						  || (nearestNode.p.equals(node.p))) {
-						 nearestNode = nearestSearch(node.lb, nearestNode, p);
-					}
-				}
+                    if (node.lb != null) {
+                         if ((node.lb.rect.distanceSquaredTo(p)
+                               <nearestNode.p.distanceSquaredTo(p))) {
+                                //|| (nearestNode.p.equals(node.p))) {
+                               nearestNode = nearestSearch(node.lb, nearestNode, p);
+                         }
+                    }
             }
         }
         return nearestNode;
