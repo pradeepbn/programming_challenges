@@ -17,8 +17,6 @@ class BinaryTree {
 
 };
 
-//template <class T> class queue;
-
 template <class T>
 class BinarySearchTree: public BinaryTree<T> {
      private:
@@ -26,8 +24,8 @@ class BinarySearchTree: public BinaryTree<T> {
           void swap(Node<T> **left, Node<T> **right);
           int max(int lhs, int rhs);
           unsigned int treeSize;
-          queue<Node<T> *> bfsQueue;// = new queue<T>();
-          
+          queue<Node<T> *> bfsQueue;
+
      public:
           BinarySearchTree() {
                this->root = NULL;
@@ -44,8 +42,10 @@ class BinarySearchTree: public BinaryTree<T> {
           }
           void mirror(Node<T> **node);
           void bfs(Node<T> *node);
-          int maxDepth(Node<T> *node, int size);
+          int maxDepth(Node<T> *node);
+          Node<T> *cloneTree(Node<T> *originalNode);
           void printTree();
+          bool hasPathSum(Node<T> *node, int sum);
 };
 /*
 +-------------------+
@@ -158,16 +158,37 @@ void BinarySearchTree<T> :: bfs(Node<T> *node) {
 }
 
 template <class T>
-int BinarySearchTree<T> :: maxDepth(Node<T> *node, int size) {
+Node<T> *BinarySearchTree<T> :: cloneTree(Node<T> *originalNode) {
+    if (originalNode == NULL) {
+        return originalNode;
+    }
+
+    Node<T> *node = new Node<T>();
+    node->item = originalNode->item;
+    node->left = cloneTree(originalNode->left);
+    node->right = cloneTree(originalNode->right);
+    return node;
+}
+
+template <class T>
+int BinarySearchTree<T> :: maxDepth(Node<T> *node) {//, int size) {
     int l_size;
     int r_size;
     if (node == NULL) {
-        return size;
+        return 0;
     }
 
-    l_size = maxDepth(node->left, size);
-    r_size = maxDepth(node->right, size);
+    l_size = maxDepth(node->left);//, size);
+    r_size = maxDepth(node->right);//, size);
     return (max(l_size, r_size) + 1);
+}
+
+template <class T>
+bool BinarySearchTree<T> :: hasPathSum(Node<T> *node, int sum) {
+    if (node == NULL) { return ((sum == 0) ? true : false); }
+    sum -= node->item;
+    return hasPathSum(node->left, sum) ||
+            hasPathSum(node->right, sum);
 }
 
 int main(int argc, char *argv[]) {
@@ -196,6 +217,13 @@ int main(int argc, char *argv[]) {
      cout << "Breadth first search" << endl;
      bst->bfs(bst->root);
      cout << endl;
-     cout << "Max Tree Depth: " << bst->maxDepth(bst->root, 0) << endl;
+     cout << "Max Tree Depth: " << bst->maxDepth(bst->root) << endl;
+
+     Node<int> *clonedTree = bst->cloneTree(bst->root);
+     cout << "In Order traversal of the cloned tree" << endl;
+     bst->inOrderTraversal(clonedTree);
+     cout << endl;
+     cout << "Cloned Tree max depth: " << bst->maxDepth(clonedTree) << endl;
+     cout << "Has path: " << ((bst->hasPathSum(clonedTree, 8) == true) ? "True" : "False") << endl;
      return 0;
 }
