@@ -1,5 +1,7 @@
-#include <BinaryTree.h>
 using namespace std;
+#include <BinaryTree.h>
+#include <cstddef>
+#include <iostream>
 
 /*
 +---------------------+                            
@@ -25,6 +27,11 @@ int BinaryTree<T> :: max(int lhs, int rhs) {
 | PUBLIC FUNCTIONS |
 +------------------+
 */
+template <class T>
+BinaryTree<T> :: BinaryTree() {
+	root = NULL;
+}
+
 template <class T>
 unsigned int BinaryTree<T> :: size(Node<T> *node) {
      if (node == NULL) {
@@ -124,3 +131,5 @@ bool BinaryTree<T> :: hasPathSum(Node<T> *node, int sum) {
     return hasPathSum(node->left, sum) ||
             hasPathSum(node->right, sum);
 }
+
+template class BinaryTree<int>;

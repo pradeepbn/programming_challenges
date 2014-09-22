@@ -1,5 +1,7 @@
-#include <BinaryTree.h>
 using namespace std;
+#include <BinaryTree.h>
+#include <BinarySearchTree.h>
+#include <cstddef>
 
 /*
 +------------------+
@@ -9,7 +11,7 @@ using namespace std;
 template <class T>
 void BinarySearchTree<T> :: insert(Node<T> **currentNode, T item) {
      if (*currentNode == NULL) {
-          cout << "Inserting Item: "  << item <<  endl; 
+          //cout << "Inserting Item: "  << item <<  endl; 
           *currentNode = new Node<T>();
           (*currentNode)->item = item;
           (*currentNode)->left = NULL;
@@ -25,3 +27,4 @@ void BinarySearchTree<T> :: insert(Node<T> **currentNode, T item) {
      return;
 }
 
+template class BinarySearchTree<int>;

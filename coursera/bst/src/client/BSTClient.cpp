@@ -1,3 +1,5 @@
+using namespace std;
+
 #include <iostream>
 #include <BinaryTree.h>
 #include <BinarySearchTree.h>
