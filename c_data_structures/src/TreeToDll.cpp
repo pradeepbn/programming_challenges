@@ -8,29 +8,37 @@ template <class T>
 class Node {
 	public:
 		T item;
-		Node<T> *left;
-		Node<T> *right;
+        union {
+            Node<T> *left;
+            Node<T> *prev;
+        };
+        union {
+            Node<T> *right;
+            Node<T> *next;
+        };
 };
 
-template <class T>
-class List {
-	public:
-		T item;
-		List<T> *prev;
-		List<T> *next;
-};
+//template <class T>
+//class List {
+//	public:
+//		T item;
+//		List<T> *prev;
+//		List<T> *next;
+//};
+//
+//template <class T>
+//class BST : public List<T>, public Node<T> {
+//	public:
+//		union {
+//			List<T> list;
+//			Node<T> node;
+//		};
+//        //List<T> list;
+//        //Node<T> node;
+//};
 
 template <class T>
-class BST : public List<T>, public Node<T> {
-	public:
-		union {
-			List<T> list;
-			Node<T> node;
-		};
-};
-
-template <class T>
-class BtOperations : public BST<T> {
+class BtOperations : public Node<T> {
 	private:
 		int compare(T item1, T item2) {
 			if (item1 < item2) { return -1; }
@@ -38,21 +46,66 @@ class BtOperations : public BST<T> {
 			else { return 0; }
 		}
 
-	public:
-		void printTree(const Node<T> *tree) {
-			if (tree == NULL) { return; }
+        void append(Node<T> *left, Node<T> *right) {
 
-			printTree(tree->left);
-			cout << tree->item << endl;
-			printTree(tree->right);
+            if (left == right) {
+                //Single node
+                left->prev = left;
+                left->next = left;
+            } else {
+                Node<T> *leftLastNode = left->prev;
+                Node<T> *rightLastNode = right->prev;
+                right->prev = leftLastNode;
+                rightLastNode->next = left;
+                leftLastNode->next = right;
+                left->prev = rightLastNode;
+            }
+        }
+
+	public:
+		Node<T> *btToList(Node<T> *node) {
+			if (node == NULL) {
+				return NULL;
+			}
+            Node<T> *leftNode = node->left;
+            Node<T> *rightNode = node->right;
+            Node<T> *leftList = btToList(leftNode); 
+            append(node, node);
+            if (!leftList) {
+                leftList = node;
+            } else {
+                append(leftList, node);
+            }
+            Node<T> *rightList = btToList(rightNode); 
+            if (rightList) {
+                append(leftList, rightList);
+            }
+            return leftList;
 		}
+
+		void printTree(Node<T> *root) {
+			if (root == NULL) { return; }
+
+			printTree(root->left);
+            cout << root->item << endl;
+			printTree(root->right);
+		}
+
+        void printList(Node<T> *node) {
+            int count = 0;
+            while (node) {
+                if (count++ == 14) {
+                    break;
+                }
+                cout << node->item << endl;
+                node = node->next;
+            }
+        }
 
 		Node<T> *insert(Node<T> **root, T item) {
 			if (*root == NULL) { 
 				*root = new Node<T>();
-				(*root)->item = item;
-				(*root)->left = NULL;
-				(*root)->right = NULL;
+                (*root)->item = item;
 				return *root;
 		   	}
 
@@ -63,44 +116,23 @@ class BtOperations : public BST<T> {
 			}
 			return (*root);
 		}
-
-		List<T> *btToList(const Node<T> *node, List<T> *parent) {
-			if (node == NULL) {
-				return NULL;
-			}
-			List<T> *ll = new List<T>();
-			ll->item = node->item;
-			List<T> *leftList = btToList(node->left, parent);
-			if (leftList) {
-				ll->prev = leftList;
-				leftList->next = ll;
-			} else if (parent) {
-				ll->prev = parent;
-				parent->next = ll;
-			}
-			List<T> *rightList = btToList(node->right, ll);
-			return rightList;
-		}
 };
 
 int main(int argc, char *argv[]) {
-	BST<int> *ll = new BST<int>();
+	//BST<int> *ll = NULL;
 	Node<int> *tree = NULL;
-	List<int> *dll;
+	Node<int> *dll;
 	BtOperations<int> *btOps = new BtOperations<int>();	
 	vector<int> array = {7, 4, 9, 2, 6, 8, 10}; 
 
 	for (auto &it : array) {
-		//cout << it << endl;
 		btOps->insert(&tree, it);
 		it++;
 	}
 
 	btOps->printTree(tree);
-	dll = btOps->btToList(tree, NULL);
-	cout << dll << endl;
-	//cout << ll->list.item << endl;
-	//cout << tree->node.item << endl;
-	//cout << sizeof(*ll) << endl;
+    cout << endl;
+	dll = btOps->btToList(tree);
+    btOps->printList(dll);
 	return 0;
 }
