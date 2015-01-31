@@ -4,121 +4,247 @@ public class SAP {
    // constructor takes a digraph (not necessarily a DAG)
    private Digraph iGraph;
    boolean graphProcessed; 
-   private ST<Integer, Integer> st = new ST<Integer, Integer>();
+   private static final int INFINITY = Integer.MAX_VALUE;
+   private int Ancestor;
+   private int Length;
+
    public SAP(Digraph G) {
 	   graphProcessed = false;
 	   iGraph = new Digraph(G);
 	}
 
-   private processorShortestAncestor(int v, int w) {
-		private static final int INFINITY = Integer.MAX_VALUE;
-		Digraph lGraph1 = new Digraph();
-		Digraph lGraph2 = new Digraph();
-		BreadthFirstDirectedPaths bfs1;
-		BreadthFirstDirectedPaths bfs2;
+   private void processShortestAncestor(int v, int w) {
+	    ST<Integer, Integer> st = new ST<Integer, Integer>();
+		Digraph lGraph1 = new Digraph(iGraph.V());
+		Digraph lGraph2 = new Digraph(iGraph.V());
+		BreadthFirstDirectedPaths bfs1 =  new BreadthFirstDirectedPaths(lGraph1, v);
+		BreadthFirstDirectedPaths bfs2 =  new BreadthFirstDirectedPaths(lGraph2, w);
 		Queue<Integer> q1 = new Queue<Integer>();	
 		Queue<Integer> q2 = new Queue<Integer>();	
-		Queue<Integer> commonNode = new Queue<Integer>();
-		int cv = INFINITY;//INFINI
+		int commonNode = INFINITY;
 
-		graphProcessed= true;
-		q1.enqueue(v):
-		q2.enqueue(w):
-		while (!q1.empty()) {
-			int m = q1.dequeue();
-			for (int x : iGraph.adj[m]) {
-				q1.enqueue(w);
-				if (bfs2.hasPathTo(x)) {
-					commonNode.enqueue(x);
+		graphProcessed = true;
+		q1.enqueue(v);
+		q2.enqueue(w);
+		while (true) {
+			if (!q1.isEmpty()) {
+				int m = q1.dequeue();
+				for (int x : iGraph.adj(m)) {
+					q1.enqueue(x);
+					lGraph1.addEdge(m, x);
+
+					//Check if there are any common nodes between bfs1 and bfs2
+					//in the current level
+					if (bfs2 != null && bfs2.hasPathTo(x)) {
+						int distToCV = bfs1.distTo(x) + bfs2.distTo(x);
+						commonNode = x;
+						st.put(commonNode, distToCV);
+						break;
+					}
 				}
-				lGraph1.addEdge(m, x);
-			}
-			bfs1 = new BreadthFirstDirectedPaths(lGraph1, v);
-		}
 
-		while (!q2.empty()) {
-			int n = q2.dequeue();
-			for (int y : iGraph.adj[n]) {
-				q2.enqueue(w);
-				if (bfs1.hasPathTo(y)) {
-					commonNode.enqueue(y);
+				bfs1 = new BreadthFirstDirectedPaths(lGraph1, v);
+				if (commonNode < INFINITY)  { break; }
+			} else if (!q2.isEmpty()) {
+				int n = q2.dequeue();
+				for (int y : iGraph.adj(n)) {
+					q2.enqueue(y);
+					lGraph2.addEdge(n, y);
+
+					//Check if there are any common nodes between bfs1 and bfs2
+					//in the current level
+					if (bfs1 != null && bfs1.hasPathTo(y)) {
+						int distToCV = bfs1.distTo(y) + bfs2.distTo(y);
+						commonNode = y;
+						st.put(commonNode, distToCV);
+						break;
+					}
 				}
-				lGraph2.addEdge(n, y);
-			}
-			bfs2 = new BreadthFirstDirectedPaths(lGraph2, w);
 
-			//Check if there are any common nodes between bfs1 and bfs2 in the current level
-			while (!commonNode.empty()) {
-				cv = commonNode.dequeue();
-				int distToCV = bfs1.distTo(cv) + bfs2.distTo(cv);
-				st.put(cv, distToCV);
-			}
+				bfs2 = new BreadthFirstDirectedPaths(lGraph2, w);
+				if (commonNode < INFINITY)  { break; }
+			} else { break; }
 		}
-
 		// Process the graph one level lower until there is no common node
 		//get EdgeTo from the upper one
-		Stack<Integer> lowerLevelVertex;
+		Stack<Integer> lowerLevelVertex = new Stack<Integer>();
 		int lCV; // local common vertex variable
 		int ldistToCV;
-		if (cv < INFINITY) {
-			lowerLevelVertex = bfs1.pathTo(cv);
-			while (!lowerLevelVertex.empty()) {
+		if (commonNode < INFINITY && bfs1 != null && bfs2 != null) {
+			for (int cv : bfs1.pathTo(commonNode)) {
+				lowerLevelVertex.push(cv);
+			}
+
+			while (!lowerLevelVertex.isEmpty()) {
 				lCV = lowerLevelVertex.pop();
 				if (!bfs2.hasPathTo(lCV)) {
 					break;
 				}
 				ldistToCV = bfs1.distTo(lCV) + bfs2.distTo(lCV);
-				st.put(lCV, distToCV);
+				st.put(lCV, ldistToCV);
 			}
 		}
+		Length = st.get(st.min()); 
+		Ancestor = st.min();
    }
 
+   private void processShortestAncestor(Iterable<Integer> v, Iterable<Integer> w) {
+	    ST<Integer, Integer> st = new ST<Integer, Integer>();
+		Digraph lGraph1 = new Digraph(iGraph.V());
+		Digraph lGraph2 = new Digraph(iGraph.V());
+		BreadthFirstDirectedPaths bfs1 =  new BreadthFirstDirectedPaths(lGraph1, v);
+		BreadthFirstDirectedPaths bfs2 =  new BreadthFirstDirectedPaths(lGraph2, w);
+		Queue<Integer> q1 = new Queue<Integer>();	
+		Queue<Integer> q2 = new Queue<Integer>();	
+		int commonNode = INFINITY;
+
+		graphProcessed = true;
+		for (int p : v) {
+			StdOut.println(p);
+			q1.enqueue(p);
+		}
+
+		StdOut.println(q1.isEmpty());
+		for (int q : w) {
+			StdOut.println(q);
+			q2.enqueue(q);
+		}
+		StdOut.println(q2.isEmpty());
+		while (true) {
+			if (!q1.isEmpty()) {
+				int m = q1.dequeue();
+				for (int x : iGraph.adj(m)) {
+					q1.enqueue(x);
+					lGraph1.addEdge(m, x);
+
+					//Check if there are any common nodes between bfs1 and bfs2
+					//in the current level
+					if (bfs2 != null && bfs2.hasPathTo(x)) {
+						int distToCV = bfs1.distTo(x) + bfs2.distTo(x);
+						commonNode = x;
+						st.put(commonNode, distToCV);
+						break;
+					}
+				}
+
+				bfs1 = new BreadthFirstDirectedPaths(lGraph1, v);
+				if (commonNode < INFINITY)  { break; }
+			} else if (!q2.isEmpty()) {
+				StdOut.println(q2.isEmpty());
+				int n = q2.dequeue();
+				StdOut.println(n);
+				for (int y : iGraph.adj(n)) {
+					q2.enqueue(y);
+					lGraph2.addEdge(n, y);
+
+					//Check if there are any common nodes between bfs1 and bfs2
+					//in the current level
+					if (bfs1 != null && bfs1.hasPathTo(y)) {
+						int distToCV = bfs1.distTo(y) + bfs2.distTo(y);
+						commonNode = y;
+						st.put(commonNode, distToCV);
+						break;
+					}
+				}
+
+				bfs2 = new BreadthFirstDirectedPaths(lGraph2, w);
+				if (commonNode < INFINITY)  { break; }
+			} else { break; }
+		}
+		// Process the graph one level lower until there is no common node
+		//get EdgeTo from the upper one
+		Stack<Integer> lowerLevelVertex = new Stack<Integer>();
+		int lCV; // local common vertex variable
+		int ldistToCV;
+		if (commonNode < INFINITY && bfs1 != null && bfs2 != null) {
+			for (int cv : bfs1.pathTo(commonNode)) {
+				lowerLevelVertex.push(cv);
+			}
+
+			while (!lowerLevelVertex.isEmpty()) {
+				lCV = lowerLevelVertex.pop();
+				if (!bfs2.hasPathTo(lCV)) {
+					break;
+				}
+				ldistToCV = bfs1.distTo(lCV) + bfs2.distTo(lCV);
+				st.put(lCV, ldistToCV);
+			}
+		}
+		Length = st.get(st.min()); 
+		Ancestor = st.min();
+   }
    // length of shortest ancestral path between v and w; -1 if no such path
    public int length(int v, int w) {
-		//List<Integer> array = new ArrayList<Integer>();
-		//array.add(v);
-		//array.add(w);
-		//DeluxeBFS dBfs = new DeluxeBFS(iGraph, array);
-   		//return dBfs.length();
 		if (!graphProcessed) {
-			processorShortestAncestor(v, w);
+			try {
+				processShortestAncestor(v, w);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				Ancestor = -1;
+				Length = -1;
+			}
 		}
-		return st.get(st.min());
+		return Length;
    }
 
    // a common ancestor of v and w that participates in a shortest ancestral path; -1 if no such path
    public int ancestor(int v, int w) {
-		//List<Integer> array = new ArrayList<Integer>();
-		//array.add(v);
-		//array.add(w);
-		//DeluxeBFS dBfs = new DeluxeBFS(iGraph, array);
-   		//return dBfs.ancestor();
 		if (!graphProcessed) {
-			processorShortestAncestor(v, w);
+			try {
+				processShortestAncestor(v, w);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				Ancestor = -1;
+				Length = -1;
+			}
 		}
-		return st.min();
-   }
+   		return Ancestor;
+	}
 
    // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
    public int length(Iterable<Integer> v, Iterable<Integer> w) {
-   		return 0;
+		if (!graphProcessed) {
+			try {
+				processShortestAncestor(v, w);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				Ancestor = -1;
+				Length = -1;
+			}
+		}
+		return Length;
    }
 
    // a common ancestor that participates in shortest ancestral path; -1 if no such path
    public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
-   		return 0;
+		if (!graphProcessed) {
+			try {
+				processShortestAncestor(v, w);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				Ancestor = -1;
+				Length = -1;
+			}
+		}
+   		return Ancestor;
    }
 
    // do unit testing of this class
 	public static void main(String[] args) {
 		In in = new In(args[0]);
 		Digraph G = new Digraph(in);
+		ArrayList<Integer> array1 = new ArrayList<Integer>();
+		array1.add(7);
+		array1.add(4);
+		array1.add(1);
+		ArrayList<Integer> array2 = new ArrayList<Integer>();
+		array2.add(5);
+		array2.add(2);
 		SAP sap = new SAP(G);
+		StdOut.println("Ancestor(array):" + sap.ancestor(array1, array2));
+		StdOut.println("Length(array):" + sap.length(array1, array2));
 		while (!StdIn.isEmpty()) {
 			int v = StdIn.readInt();
 			int w = StdIn.readInt();
-			StdOut.println(sap.ancestor(v, w));
-			StdOut.println(sap.length(v, w));
+			sap = new SAP(G);
+			StdOut.println("Ancestor:" + sap.ancestor(v, w));
+			StdOut.println("Length:" + sap.length(v, w));
 		}
 	}
 }
