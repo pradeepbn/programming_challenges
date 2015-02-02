@@ -182,7 +182,7 @@ public class SAP {
 		if (!graphProcessed) {
 			try {
 				processShortestAncestor(v, w);
-			} catch (ArrayIndexOutOfBoundsException e) {
+			} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
 				Ancestor = -1;
 				Length = -1;
 			}
@@ -195,7 +195,7 @@ public class SAP {
 		if (!graphProcessed) {
 			try {
 				processShortestAncestor(v, w);
-			} catch (ArrayIndexOutOfBoundsException e) {
+			} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
 				Ancestor = -1;
 				Length = -1;
 			}
@@ -217,7 +217,7 @@ public class SAP {
 		if (!graphProcessed) {
 			try {
 				processShortestAncestor(v, w);
-			} catch (ArrayIndexOutOfBoundsException e) {
+			} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
 				Ancestor = -1;
 				Length = -1;
 			}
@@ -230,7 +230,7 @@ public class SAP {
 		if (!graphProcessed) {
 			try {
 				processShortestAncestor(v, w);
-			} catch (ArrayIndexOutOfBoundsException e) {
+			} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
 				Ancestor = -1;
 				Length = -1;
 			}
