@@ -13,6 +13,10 @@ public class SAP {
 	   iGraph = new Digraph(G);
 	}
 
+   /*
+	* TODO
+	* Needs to enhancement to support v == w case
+	*/
    private void processShortestAncestor(int v, int w) {
 	    ST<Integer, Integer> st = new ST<Integer, Integer>();
 		Digraph lGraph1 = new Digraph(iGraph.V());
@@ -100,16 +104,16 @@ public class SAP {
 
 		graphProcessed = true;
 		for (int p : v) {
-			StdOut.println(p);
+			//StdOut.println(p);
 			q1.enqueue(p);
 		}
 
-		StdOut.println(q1.isEmpty());
+		//StdOut.println(q1.isEmpty());
 		for (int q : w) {
-			StdOut.println(q);
+			//StdOut.println(q);
 			q2.enqueue(q);
 		}
-		StdOut.println(q2.isEmpty());
+		//StdOut.println(q2.isEmpty());
 		while (true) {
 			if (!q1.isEmpty()) {
 				int m = q1.dequeue();
@@ -130,9 +134,9 @@ public class SAP {
 				bfs1 = new BreadthFirstDirectedPaths(lGraph1, v);
 				if (commonNode < INFINITY)  { break; }
 			} else if (!q2.isEmpty()) {
-				StdOut.println(q2.isEmpty());
+				//StdOut.println(q2.isEmpty());
 				int n = q2.dequeue();
-				StdOut.println(n);
+				//StdOut.println(n);
 				for (int y : iGraph.adj(n)) {
 					q2.enqueue(y);
 					lGraph2.addEdge(n, y);
@@ -178,7 +182,7 @@ public class SAP {
 		if (!graphProcessed) {
 			try {
 				processShortestAncestor(v, w);
-			} catch (ArrayIndexOutOfBoundsException e) {
+			} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
 				Ancestor = -1;
 				Length = -1;
 			}
@@ -191,7 +195,7 @@ public class SAP {
 		if (!graphProcessed) {
 			try {
 				processShortestAncestor(v, w);
-			} catch (ArrayIndexOutOfBoundsException e) {
+			} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
 				Ancestor = -1;
 				Length = -1;
 			}
@@ -199,12 +203,21 @@ public class SAP {
    		return Ancestor;
 	}
 
+   /*
+	* TODO
+	* Need to make length State machine driven
+	* 1. Red: 	In this case, we should evaluate processShortestAncestor 
+	* 			since the processShortestAncestor has not been evaluated
+	* 			even once with the parameters.
+	* 2. Green: Either length or ancestor has been called once with same parameters.
+	* 			So, evalation not required.
+	*/
    // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
    public int length(Iterable<Integer> v, Iterable<Integer> w) {
 		if (!graphProcessed) {
 			try {
 				processShortestAncestor(v, w);
-			} catch (ArrayIndexOutOfBoundsException e) {
+			} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
 				Ancestor = -1;
 				Length = -1;
 			}
@@ -217,7 +230,7 @@ public class SAP {
 		if (!graphProcessed) {
 			try {
 				processShortestAncestor(v, w);
-			} catch (ArrayIndexOutOfBoundsException e) {
+			} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
 				Ancestor = -1;
 				Length = -1;
 			}
