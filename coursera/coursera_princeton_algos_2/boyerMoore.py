@@ -10,7 +10,7 @@ def computeRightMostCharacterMatrix(pattern):
 
 def matchSubstring(text, pattern):
     computeRightMostCharacterMatrix(pattern);
-    print rMatrix;
+#print rMatrix;
     M = len(pattern);
     skip = 0;
     i = 0;
@@ -32,10 +32,18 @@ def matchSubstring(text, pattern):
 
 
 if __name__ == '__main__':
-    pattern = "ababac"
-    text = "mnopqrstababactuvew";
+    #pattern = "ababac"
+    pattern = "jkvnjkhdanfbklhadfgbklnd";
+#    text = "mnopqrstababactuvew";
+    #text = "ad;kjfghladfhgljahdfgkjvndckjvnkjadfhguoaehfgouhqeiu hdfkasdfjkha iashdfil aslihdfilashdf hdfjklha kjhdf sahfjkasf mnopqrstababactuvew";
+    text = "adkasdfsadfmsdfsdafjhadfgkjdafbdafjkvnjkhdanfbklhadfgbklndakbnvadjkfnvbjdbydhabfkhdafklgbhadlkfghdakfhglkjadhfgklajdhfglakjdhgadnopqrstababactuvew";
 #print text[matchSubstring(text, pattern)];
 #    print rMatrix;
     import timeit
-    print(timeit.timeit("matchSubstring(text, pattern)"));#, setup="from __main__ "))
-
+    matchString = "matchSubstring(text, pattern)";
+    timer = timeit.Timer(lambda : matchSubstring(text, pattern));
+    result = timer.repeat(repeat=100, number=1);
+    #print result;
+    print sum(result)/ len(result);
+#    print(timeit.timeit(matchString, setup="from __main__ import matchSubstring"))
+    #result 

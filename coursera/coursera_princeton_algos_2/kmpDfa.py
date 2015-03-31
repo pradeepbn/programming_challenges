@@ -32,7 +32,19 @@ def matchSubstring(text, pattern):
         if (j == len(pattern)):
             return (i - len(pattern) + 1);
             break;
-        
-pattern = "ababac";
-text = "mnopqrstababactuvew";
-print text[matchSubstring(text, pattern)];
+
+if __name__ == '__main__':
+    pattern = "ababac"
+    #text = "mnopqrstababactuvew";
+    pattern = "jkvnjkhdanfbklhadfgbklnd";
+    text = "adkasdfsadfmsdfsdafjhadfgkjdafbdafjkvnjkhdanfbklhadfgbklndakbnvadjkfnvbjdbydhabfkhdafklgbhadlkfghdakfhglkjadhfgklajdhfglakjdhgadnopqrstababactuvew";
+#    text = "ad;kjfghladfhg;ljahdfgkjvndckjvnkjadfhguoaehfgouhqeiu hdfkasdfjkha iashdfil; aslihdfilashdf hdfjklha kjhdf sahfjkasf mnopqrstababactuvew";
+#print text[matchSubstring(text, pattern)];
+#    print rMatrix;
+    import timeit
+    matchString = "matchSubstring(text, pattern)";
+    timer = timeit.Timer(lambda : matchSubstring(text, pattern));
+    result = timer.repeat(repeat=100, number=1);
+    #print result;
+    print sum(result)/ len(result);
+#    print(timeit.timeit(matchString, setup="from __main__ import matchSubstring"))
