@@ -8,43 +8,40 @@ using namespace std;
 vector<string>
 anagrams(vector<string> &strs) {
     vector<string> result;
-    unordered_multimap<string, unordered_multimap<string, string>> anagramHash;
+    unordered_multimap<string, vector<string>> anagramHash;
     string sLocal;
 
-    for (auto& str: strs) {
+	anagramHash.reserve(20);
+
+	//cout << strs.size() << endl;
+    for (string str: strs) {
         sLocal.assign(str);
         sort(sLocal.begin(), sLocal.end());
-        //cout << sLocal << endl;
+		//cout << "sLocal:" << sLocal << endl;
 		auto it = anagramHash.find(sLocal);
-		if (it != unordered_multimap::end) {
-			(it->second).insert(make_pair(sLocal, str));
+		if (it != anagramHash.end()) {
+			(it->second).push_back(str);
 		} else {
-			anagramHash.emplace(sLocal, make_pair(sLocal, str));
+			vector<string> lVector;
+			lVector.push_back(str);
+			anagramHash.emplace(sLocal, lVector);
 		} 
 			
     }
 
-    //cout << anagramHash.bucket_count() << endl;
-    //innerItfor (unsigned i = 0; i < anagramHash.bucket_count(); i++) {
-    //innerIt    if (anagramHash.bucket_size(i) > 1) {
-    //innerIt        cout << anagramHash.bucket_size(i) << endl;
-    //innerIt        for (auto it = anagramHash.begin(i); it != anagramHash.end(i); ++it) {
-	//innerIt			for (j = 0; j < (it->second).bucket_count(); j++) {
-	//innerIt				if ((it->second).bucket_size(j) > 1) {
-	//innerIt					for (auto innerIt = (it->second).begin(j); 
-	//innerIt							innerIt != (it->second).end(j); innerIt) {
-	//innerIt						result.push_back(innerIt->second);
-	//innerIt					}
-	//innerIt				}
-	//innerIt			}
-	//innerIt			}
-    //innerIt            //cout << anagramHash.hash_function()(it->first) << ";";
-    //innerIt            //cout << it->second << endl;
-    //innerIt            //result.push_back(it->second);
-    //innerIt        }
-    //innerIt        cout << endl;
-    //innerIt    }
-    //innerIt}
+    for (unsigned i = 0; i < anagramHash.bucket_count(); i++) {
+		//cout << "Bucket size:" << anagramHash.bucket_size(i) << endl;
+        if (anagramHash.bucket_size(i) > 0) {
+			for (auto it = anagramHash.begin(i); it != anagramHash.end(i); ++it) {
+				//cout << "Item size:" << (it->second).size() << endl;
+				if ((it->second).size() > 1) {
+					for (auto str : (it->second)) {
+						result.push_back(str);
+					}
+				}
+            }
+        }
+    }
 
     return result;
 }
@@ -60,6 +57,7 @@ int main(int argc, char *argv[]) {
 
     vector<string> result = anagrams(sVector);
 
+	cout << "Result size:" << result.size() << endl;
     for (auto &str : result) {
         cout << str << endl;
     }
