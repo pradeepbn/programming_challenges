@@ -22,6 +22,15 @@ private:
 			return 0;
 		}
 	}
+
+	vector<int> array;
+    void printTree(TreeNode *root) {//, vector<int> array) {
+        if (root == NULL) {
+            return;
+        }
+        array.push_back(root->val);
+        printTree(root->right);
+    }
 public:
 	void construct(TreeNode *&root, T val) {
 		if (root == NULL) {
@@ -35,25 +44,26 @@ public:
 		}
 	}
 
-	void printTree(TreeNode *root) {
-		if (root == NULL) {
-			return;
-		}
-		printTree(root->left);
-		cout << root->val << endl;
-		printTree(root->right);
-	}
+    vector<int> rightSideView(TreeNode *root) {
+        //vector<int> array;
+        printTree(root);
+        return array;
+    }
 };
 
 
 int main(int argc, char *argv[]) {
 	Tree<int> t;
-	vector<int> array = {4, 1, 2, 6, 10, 11, 9, -1, 4, 5};	
+	vector<int> array = {1, 2};//{4, 1, 2, 6, 10, 11, 9, -1, 4, 5};	
 	TreeNode *root = NULL;
 	for (auto i : array) {
 		t.construct(root, i);
 	}
 
-	t.printTree(root);
+	vector<int> rightViewArray = t.rightSideView(root);
+	
+	for (auto i : rightViewArray) {
+		cout << i << endl;
+	}
 	return 0;
 }
